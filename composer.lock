@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "3b7acfc586da9f722cbba4aa33a9d079",
+    "content-hash": "8200a3d8c16cf9f54a830fd2371cd7bf",
     "packages": [
         {
             "name": "doctrine/annotations",
@@ -415,9 +415,9 @@
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/flash-global/api-client/zipball/5a15cc50b13ea1693ca08e4d7dcb1a4829c8086f",
+                "url": "https://composer.flash-global.net/dist/fei-api-client-5a15cc50b13ea1693ca08e4d7dcb1a4829c8086f-zip-9f6611.zip",
                 "reference": "5a15cc50b13ea1693ca08e4d7dcb1a4829c8086f",
-                "shasum": ""
+                "shasum": "2e4070dd0783d3588f4b6432eb4894b45bd15bef"
             },
             "require": {
                 "fei/entities": "1.*",
@@ -457,9 +457,9 @@
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/flash-global/entities/zipball/bf2aa1ae8c0c49cb6989c58c721a45e8692a52ab",
+                "url": "https://composer.flash-global.net/dist/fei-entities-bf2aa1ae8c0c49cb6989c58c721a45e8692a52ab-zip-acd356.zip",
                 "reference": "bf2aa1ae8c0c49cb6989c58c721a45e8692a52ab",
-                "shasum": ""
+                "shasum": "67bf0a2ab69dfdb61a376b8ced88c87ed7f47e03"
             },
             "require-dev": {
                 "codeception/codeception": "^2.2",
@@ -483,11 +483,17 @@
         },
         {
             "name": "fei/filer-common",
-            "version": "dev-master",
+            "version": "v1.0.0",
             "source": {
                 "type": "git",
-                "url": "git@github.com:opcoding/filer-common.git",
-                "reference": "2e9023d230dea30107af298ffe0165c96b218769"
+                "url": "git@github.com:flash-global/filer-common.git",
+                "reference": "2fe32b27f150720e56ceca42ab7bbbf0fa6f8f64"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://composer.flash-global.net/dist/fei-filer-common-2fe32b27f150720e56ceca42ab7bbbf0fa6f8f64-zip-662995.zip",
+                "reference": "2fe32b27f150720e56ceca42ab7bbbf0fa6f8f64",
+                "shasum": "919d7b3bd8fc216cfdf191bb909ed9b562aae679"
             },
             "require": {
                 "doctrine/common": "^2.6.1",
@@ -519,7 +525,11 @@
             "keywords": [
                 "filer"
             ],
-            "time": "2017-01-25 13:34:42"
+            "support": {
+                "source": "https://github.com/flash-global/filer-common/tree/v1.0.0",
+                "issues": "https://github.com/flash-global/filer-common/issues"
+            },
+            "time": "2017-01-25T13:53:38+00:00"
         },
         {
             "name": "guzzle/guzzle",
@@ -3014,9 +3024,7 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "fei/filer-common": 20
-    },
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": [],
