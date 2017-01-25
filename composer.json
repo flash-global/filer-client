@@ -1,0 +1,40 @@
+{
+    "name": "fei/filer-client",
+    "description": "Flash applicative Filer - client component",
+    "type": "project",
+    "license": "proprietary",
+    "authors": [
+        {
+            "name": "Vincent Simonin",
+            "email": "vsi@opcoding.eu",
+            "role": "lead"
+        },
+        {
+            "name": "Alexandre Lopez",
+            "email": "alo@opcoding.eu",
+            "role": "dev"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Fei\\Service\\Filer\\Client\\": "src/"
+        }
+    },
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "https://composer.flash-global.net"
+        },
+        {
+            "type": "git",
+            "url": "git@github.com:opcoding/filer-common.git"
+        }
+    ],
+    "require": {
+        "fei/api-client": "^1.1",
+        "fei/filer-common": "dev-master"
+    },
+    "require-dev": {
+        "codeception/codeception": "^2.2"
+    }
+}

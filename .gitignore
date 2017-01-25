@@ -1,0 +1,6 @@
+vendor/*
+tests/_output/*
+tests/_data/saveAs/*
+!tests/_data/saveAs/.gitkeep
+.DS_Store
+.idea/
