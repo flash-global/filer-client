@@ -36,6 +36,7 @@ class Filer extends AbstractApiClient implements FilerInterface
         $response = $this->send($request);
 
         $body = \json_decode($response->getBody(), true);
+
         $body['files'] = $body['files'] ?? [];
 
         foreach ($body['files'] as &$file) {
