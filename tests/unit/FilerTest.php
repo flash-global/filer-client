@@ -11,6 +11,7 @@ use Fei\ApiClient\Transport\AsyncTransportInterface;
 use Fei\ApiClient\ApiRequestOption;
 use Fei\ApiClient\Transport\SyncTransportInterface;
 use Fei\ApiClient\Transport\TransportException;
+use Fei\Service\Filer\Client\Builder\SearchBuilder;
 use Fei\Service\Filer\Client\Exception\FilerException;
 use Fei\Service\Filer\Client\Exception\ValidationException;
 use Fei\Service\Filer\Client\Filer;
@@ -565,6 +566,42 @@ JSON
         $this->assertEquals($request->getUrl(), 'http://url/api/files/uuid?category=1');
         $this->assertEquals([], $request->getBodyParams());
         $this->assertEquals($result, 'test-uuid');
+    }
+
+    public function testSearch()
+    {
+        $filer = new Filer([Filer::OPTION_BASEURL => 'http://url']);
+
+        $request = new RequestDescriptor();
+        $flag = null;
+
+        $arr = (new File())
+            ->setUuid('test:00000000-0000-0000-0000-000000000000')
+            ->setRevision(2)
+            ->setCategory(3)
+            ->setFilename('fake-filename')
+            ->toArray();
+
+        $transport = $this->createMock(SyncTransportInterface::class);
+        $transport->expects($this->once())->method('send')->willReturnCallback(
+            function (RequestDescriptor $requestDescriptor, $mFlag) use (&$request, &$flag, $transport, $arr) {
+                $request = $requestDescriptor;
+                $flag = $mFlag;
+                return (new ResponseDescriptor())->setBody(json_encode([
+                    'files' => [$arr]
+                ]));
+            }
+        );
+
+        $filer->setTransport($transport);
+
+        $builder = new SearchBuilder();
+        $builder->filename()->equal('fake-filename');
+        $result = $filer->search($builder);
+
+        $this->assertEquals([
+            new FileWrapper($filer, $arr)
+        ], $result);
     }
 
     public function testEmbed()
