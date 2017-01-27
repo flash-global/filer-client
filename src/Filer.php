@@ -6,6 +6,7 @@ use Fei\ApiClient\AbstractApiClient;
 use Fei\ApiClient\ApiRequestOption;
 use Fei\ApiClient\RequestDescriptor;
 use Fei\ApiClient\ResponseDescriptor;
+use Fei\Service\Filer\Client\Builder\SearchBuilder;
 use Fei\Service\Filer\Client\Exception\FilerException;
 use Fei\Service\Filer\Client\Exception\ValidationException;
 use Fei\Service\Filer\Client\Service\FileWrapper;
@@ -21,6 +22,28 @@ use Guzzle\Http\Exception\BadResponseException;
 class Filer extends AbstractApiClient implements FilerInterface
 {
     const API_FILER_PATH_INFO = '/api/files';
+
+    public function search(SearchBuilder $builder)
+    {
+        $request = (new RequestDescriptor())
+            ->setMethod('GET')
+            ->setUrl(
+                $this->buildUrl(
+                    self::API_FILER_PATH_INFO . '?criterias=' . urlencode(json_encode($builder->getParams()))
+                )
+            );
+
+        $response = $this->send($request);
+
+        $body = \json_decode($response->getBody(), true);
+        $body['files'] = $body['files'] ?? [];
+
+        foreach ($body['files'] as &$file) {
+            $file = new FileWrapper($this, $file);
+        }
+
+        return $body['files'];
+    }
 
     /**
      * {@inheritdoc}
