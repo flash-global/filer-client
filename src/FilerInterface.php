@@ -2,6 +2,7 @@
 
 namespace Fei\Service\Filer\Client;
 
+use Fei\Service\Filer\Client\Builder\SearchBuilder;
 use Fei\Service\Filer\Entity\File;
 
 /**
@@ -13,6 +14,15 @@ interface FilerInterface
 {
     const ASYNC_UPLOAD = 2;
     const NEW_REVISION = 4;
+
+    /**
+     * Search for files
+     *
+     * @param SearchBuilder $builder
+     *
+     * @return array Return an array of File instances
+     */
+    public function search(SearchBuilder $builder);
 
     /**
      * Upload a file

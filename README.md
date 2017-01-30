@@ -139,6 +139,39 @@ Only one option is available which can be passed to the constructor or `Filer::s
 
 **Note:** All the examples below are also available in `examples` directory.
 
+### Search the files
+
+You can search the files directly from the client with `Filer::search($builder)`
+
+- `$builder` must be a `SearchBuilder` instance
+
+You can create your searches using the SearchBuilder to make the search easier to use.
+
+```php
+<?php
+
+use Fei\Service\Filer\Client\Filer;
+use Fei\Service\Filer\Client\Builder\SearchBuilder;
+
+// Creating a Filer client instance...
+$filer = new Filer([Filer::OPTION_BASEURL => 'http://127.0.0.1:8080']);
+
+$builder = new SearchBuilder();
+$builder->category()->equal(1);
+$builder->context()->key('test 1')->equal('test 1');
+$builder->context()->key('test 2')->equal('test 2');
+$builder->filename()->beginsWith('avatar');
+
+$files = $filer->search($builder);
+```
+
+As you can see mutiple methods are available like `filename` and multiple operators methods too like :
+
+- `like` : to use the `LIKE` operator
+- `equal` : to use the `=` operator
+- `beginsWith` : to use the `LIKE` operator and the string has to start by the value specified
+- `endsWith` : to use the `LIKE` operator and the string has to end by the value specified
+
 ### Upload a new file
 
 You can upload a file instance with `Filer::upload($file, $flags)`:
