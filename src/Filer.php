@@ -57,16 +57,25 @@ class Filer extends AbstractApiClient implements FilerInterface
             throw new ValidationException('UUID must be set when adding a new revision');
         }
 
+        $uuidCreated = false;
         if ($flags & self::ASYNC_UPLOAD && $file->getUuid() === null) {
             $file->setUuid($this->createUuid($file->getCategory()));
+            $uuidCreated = true;
         }
 
         if ($flags & self::ASYNC_UPLOAD && !$this->getAsyncTransport()) {
             throw new FilerException('Asynchronous Transport has to be set');
         }
 
+        $method = 'POST';
+        if ($flags & self::NEW_REVISION) {
+            $method = 'PUT';
+        } elseif ($file->getUuid() !== null && !$uuidCreated) {
+            $method = 'PATCH';
+        }
+
         $request = (new RequestDescriptor())
-            ->setMethod($flags & self::NEW_REVISION ? 'PUT' : 'POST')
+            ->setMethod($method)
             ->setUrl($this->buildUrl(self::API_FILER_PATH_INFO));
         $request->addHeader('Content-Type', 'application/x-www-form-urlencoded');
         $request->setBodyParams(['file' => \json_encode($file->toArray())]);
