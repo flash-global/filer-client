@@ -9,7 +9,7 @@ class Filename extends OperatorBuilder
     {
         $search = $this->builder->getParams();
         $search['filename'] = $value;
-        $search['filename_operator'] = $operator ?? '=';
+        $search['filename_operator'] = (isset($operator)) ? $operator : '=';
 
         $this->builder->setParams($search);
     }
