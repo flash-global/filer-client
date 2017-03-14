@@ -70,7 +70,7 @@ class FilerTest extends Unit
         $result = $filer->upload($file, Filer::ASYNC_UPLOAD);
 
         $this->assertNotFalse($flag & ApiRequestOption::NO_RESPONSE);
-        $this->assertEquals($request->getMethod(), 'POST');
+        $this->assertEquals('PATCH', $request->getMethod());
         $this->assertEquals($request->getUrl(), 'http://url/api/files');
         $this->assertEquals(
             ['file' => \json_encode($file->toArray())],
@@ -82,9 +82,9 @@ class FilerTest extends Unit
     public function testUploadAsyncTransportNoUuid()
     {
         $filer = $this->getMockBuilder(Filer::class)
+            ->setConstructorArgs([[Filer::OPTION_BASEURL => 'http://url']])
             ->setMethods(['createUuid'])
             ->getMock();
-
         $filer->expects($this->once())->method('createUuid')->willReturn('test-uuid');
 
         $transport = $this->createMock(AsyncTransportInterface::class);
@@ -103,6 +103,13 @@ class FilerTest extends Unit
 
         $result = $filer->upload($file, Filer::ASYNC_UPLOAD);
 
+        $this->assertNotFalse($flag & ApiRequestOption::NO_RESPONSE);
+        $this->assertEquals('POST', $request->getMethod());
+        $this->assertEquals($request->getUrl(), 'http://url/api/files');
+        $this->assertEquals(
+            ['file' => \json_encode($file->toArray())],
+            $request->getBodyParams()
+        );
         $this->assertNull($result);
     }
 
@@ -143,13 +150,13 @@ class FilerTest extends Unit
         $file = $this->getValidFileInstance();
         $file->setUuid(null);
 
-        $result = $filer->upload($this->getValidFileInstance());
+        $result = $filer->upload($file);
 
         $this->assertTrue($flag === 0);
-        $this->assertEquals($request->getMethod(), 'POST');
+        $this->assertEquals('POST', $request->getMethod());
         $this->assertEquals($request->getUrl(), 'http://url/api/files');
         $this->assertEquals(
-            ['file' => \json_encode($this->getValidFileInstance()->toArray())],
+            ['file' => \json_encode($file->toArray())],
             $request->getBodyParams()
         );
         $this->assertEquals($result, 'test-uuid');
@@ -191,7 +198,71 @@ class FilerTest extends Unit
         $filer->upload($file, Filer::ASYNC_UPLOAD|Filer::NEW_REVISION);
 
         $this->assertNotFalse($flag & ApiRequestOption::NO_RESPONSE);
-        $this->assertEquals($request->getMethod(), 'PUT');
+        $this->assertEquals('PUT', $request->getMethod());
+        $this->assertEquals($request->getUrl(), 'http://url/api/files');
+        $this->assertEquals($request->getHeader('Content-Type'), 'application/x-www-form-urlencoded');
+        $this->assertEquals(
+            ['file' => \json_encode($file->toArray())],
+            $request->getBodyParams()
+        );
+    }
+
+    public function testAsyncTransportUpdateLastRevision()
+    {
+        $filer = new Filer([Filer::OPTION_BASEURL => 'http://url']);
+
+        $request = new RequestDescriptor();
+        $flag = null;
+
+        $transport = $this->createMock(AsyncTransportInterface::class);
+        $transport->expects($this->once())->method('send')->willReturnCallback(
+            function (RequestDescriptor $requestDescriptor, $mFlag) use (&$request, &$flag, $transport) {
+                $request = $requestDescriptor;
+                $flag = $mFlag;
+                return $transport;
+            }
+        );
+
+        $filer->setAsyncTransport($transport);
+
+        $file = $this->getValidFileInstance();
+
+        $filer->upload($file, Filer::ASYNC_UPLOAD);
+
+        $this->assertNotFalse($flag & ApiRequestOption::NO_RESPONSE);
+        $this->assertEquals('PATCH', $request->getMethod());
+        $this->assertEquals($request->getUrl(), 'http://url/api/files');
+        $this->assertEquals($request->getHeader('Content-Type'), 'application/x-www-form-urlencoded');
+        $this->assertEquals(
+            ['file' => \json_encode($file->toArray())],
+            $request->getBodyParams()
+        );
+    }
+
+    public function testBasicTransportUpdateLastRevision()
+    {
+        $filer = new Filer([Filer::OPTION_BASEURL => 'http://url']);
+
+        $request = new RequestDescriptor();
+        $flag = null;
+
+        $transport = $this->createMock(SyncTransportInterface::class);
+        $transport->expects($this->once())->method('send')->willReturnCallback(
+            function (RequestDescriptor $requestDescriptor, $mFlag) use (&$request, &$flag, $transport) {
+                $request = $requestDescriptor;
+                $flag = $mFlag;
+                return $transport;
+            }
+        );
+
+        $filer->setTransport($transport);
+
+        $file = $this->getValidFileInstance();
+
+        $filer->upload($file);
+
+        $this->assertNotFalse($flag & ApiRequestOption::NO_RESPONSE);
+        $this->assertEquals('PATCH', $request->getMethod());
         $this->assertEquals($request->getUrl(), 'http://url/api/files');
         $this->assertEquals($request->getHeader('Content-Type'), 'application/x-www-form-urlencoded');
         $this->assertEquals(
