@@ -51,8 +51,6 @@ class Filer extends AbstractApiClient implements FilerInterface
      */
     public function upload(File $file, $flags = null)
     {
-        $this->validateFile($file);
-
         if ($flags & self::NEW_REVISION && $file->getUuid() === null) {
             throw new ValidationException('UUID must be set when adding a new revision');
         }
@@ -67,12 +65,21 @@ class Filer extends AbstractApiClient implements FilerInterface
             throw new FilerException('Asynchronous Transport has to be set');
         }
 
+
         $method = 'POST';
+        $checkData = true;
         if ($flags & self::NEW_REVISION) {
             $method = 'PUT';
         } elseif ($file->getUuid() !== null && !$uuidCreated) {
             $method = 'PATCH';
+            $checkData = false;
+
+            if ($file instanceof FileWrapper) {
+                $file->setSkipData(true);
+            }
         }
+
+        $this->validateFile($file, $checkData);
 
         $request = (new RequestDescriptor())
             ->setMethod($method)
@@ -323,10 +330,11 @@ class Filer extends AbstractApiClient implements FilerInterface
      * Validate a File entity
      *
      * @param File $file
+     * @param bool $checkData
      */
-    protected function validateFile(File $file)
+    protected function validateFile(File $file, $checkData = true)
     {
-        $validator = new FileValidator();
+        $validator = new FileValidator($checkData);
 
         if (!$validator->validate($file)) {
             throw (new ValidationException(
