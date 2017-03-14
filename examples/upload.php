@@ -19,18 +19,29 @@ try {
             ->setFile(new SplFileObject(__DIR__ . '/../tests/_data/avatar.png'))
     );
 
-    echo $uuid . PHP_EOL;
+    echo (is_string($uuid) ? $uuid : (string) $uuid->getBody()) . PHP_EOL;
 
     $uuid = $filer->upload(
         (new File())
             ->setCategory(File::CATEGORY_IMG)
             ->setUuid($uuid)
             ->setFile(new SplFileObject(__DIR__ . '/../tests/_data/capture.png'))
-            ->setContexts(['test 3' => 'test 1', 'test 4' => 'test 2']),
+            ->setContexts(['test 1' => 'test 1' ,'test 3' => 'test 1', 'test 4' => 'test 2']),
         Filer::NEW_REVISION
     );
 
-    echo $uuid . PHP_EOL;
+    echo (is_string($uuid) ? $uuid : (string) $uuid->getBody()) . PHP_EOL;
+
+    $uuid = $filer->upload(
+        (new File())
+            ->setCategory(File::CATEGORY_IMG)
+            ->setUuid($uuid)
+            ->setFile(new SplFileObject(__DIR__ . '/../tests/_data/capture.png'))
+            ->setContexts(['test 3' => 'test 3', 'test 4' => 'test 4', 'test 5' => 'test 5'])
+    );
+
+    echo (is_string($uuid) ? $uuid : (string) $uuid->getBody()) . PHP_EOL;
+
 } catch (\Exception $e) {
     echo $e->getMessage() . PHP_EOL;
     $previous = $e->getPrevious();
