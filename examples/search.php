@@ -4,14 +4,17 @@ require __DIR__ . '/../vendor/autoload.php';
 use Fei\Service\Filer\Client\Builder\SearchBuilder;
 use Fei\Service\Filer\Client\Filer;
 use Fei\ApiClient\Transport\BasicTransport;
+use Fei\Service\Filer\Entity\File;
 
-$filer = new Filer([Filer::OPTION_BASEURL => 'http://172.17.0.1:8003']);
+$filer = new Filer([Filer::OPTION_BASEURL => 'http://127.0.0.1:8020']);
 
 $filer->setTransport(new BasicTransport());
 
 try {
     $searchBuilder = new SearchBuilder();
-    $searchBuilder->category()->equal(2);
+
+    $searchBuilder->category()->equal(File::CATEGORY_CLIENT);
+    $searchBuilder->category()->equal(File::CATEGORY_SUPPLIER);
     $searchBuilder->context()->key('test 1')->equal('test 1');
     $searchBuilder->filename()->equal('avatar.png');
 
