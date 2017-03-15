@@ -85,7 +85,7 @@ class FilerTest extends Unit
             ->setConstructorArgs([[Filer::OPTION_BASEURL => 'http://url']])
             ->setMethods(['createUuid'])
             ->getMock();
-        $filer->expects($this->once())->method('createUuid')->willReturn('test-uuid');
+        $filer->expects($this->once())->method('createUuid')->willReturn('bck1:22b52127-7dbd-4294-81f4-8638906c646a');
 
         $transport = $this->createMock(AsyncTransportInterface::class);
         $transport->expects($this->once())->method('send')->willReturnCallback(
