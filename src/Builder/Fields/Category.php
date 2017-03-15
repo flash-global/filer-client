@@ -8,7 +8,12 @@ class Category extends OperatorBuilder
     public function build($value, $operator = null)
     {
         $search = $this->builder->getParams();
-        $search['category'] = $value;
+
+        if (!isset($search['category'])) {
+            $search['category'] = [];
+        }
+
+        $search['category'][] = $value;
 
         $this->builder->setParams($search);
     }

@@ -19,7 +19,7 @@ class CategoryTest extends Unit
         $category->build(1);
 
         $this->assertAttributeEquals([
-            'category' => 1
+            'category' => [1]
         ], 'params', $builder);
     }
 }
