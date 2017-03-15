@@ -38,4 +38,13 @@ class FileWrapperTest extends Unit
 
         $this->assertEquals('fake-data', $filerWrapper->getData());
     }
+
+    public function testSkipDataAccessors()
+    {
+        $fileWrapper = new FileWrapper(new Filer([]));
+        $fileWrapper->setSkipData(false);
+
+        $this->assertEquals(false, $fileWrapper->isSkipData());
+        $this->assertAttributeEquals($fileWrapper->isSkipData(), 'skipData', $fileWrapper);
+    }
 }
