@@ -172,6 +172,14 @@ As you can see mutiple methods are available like `filename` and multiple operat
 - `beginsWith` : to use the `LIKE` operator and the string has to start by the value specified
 - `endsWith` : to use the `LIKE` operator and the string has to end by the value specified
 
+Note that you can search on multiple categories by adding multiple categories filter :
+
+```php
+$builder->category()->equal(1);
+$builder->category()->equal(2);
+$builder->category()->equal(3);
+```
+
 ### Upload a new file
 
 You can upload a file instance with `Filer::upload($file, $flags)`:

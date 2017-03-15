@@ -6,7 +6,7 @@ use Fei\Service\Filer\Entity\File;
 
 require __DIR__ . '/../vendor/autoload.php';
 
-$filer = new Filer([Filer::OPTION_BASEURL => 'http://127.0.0.1:8080']);
+$filer = new Filer([Filer::OPTION_BASEURL => 'http://127.0.0.1:8020']);
 
 $filer->setTransport(new BasicTransport());
 
@@ -32,13 +32,9 @@ try {
 
     echo (is_string($uuid) ? $uuid : (string) $uuid->getBody()) . PHP_EOL;
 
-    $uuid = $filer->upload(
-        (new File())
-            ->setCategory(File::CATEGORY_IMG)
-            ->setUuid($uuid)
-            ->setFile(new SplFileObject(__DIR__ . '/../tests/_data/capture.png'))
-            ->setContexts(['test 3' => 'test 3', 'test 4' => 'test 4', 'test 5' => 'test 5'])
-    );
+    $file = $filer->retrieve($uuid);
+    $file->setContexts(['test 1' => 'New value']);
+    $filer->upload($file);
 
     echo (is_string($uuid) ? $uuid : (string) $uuid->getBody()) . PHP_EOL;
 

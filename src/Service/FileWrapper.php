@@ -12,6 +12,11 @@ class FileWrapper extends File
     protected $filer;
 
     /**
+     * @var bool
+     */
+    protected $skipData = false;
+
+    /**
      * FileWrapper constructor.
      *
      * @param Filer $filer
@@ -55,10 +60,34 @@ class FileWrapper extends File
         $data = parent::getData();
 
         // getting the data if they are not loaded yet
-        if (empty($data)) {
+        if (empty($data) && $this->isSkipData() === false) {
             $data = $this->getFiler()->getFileBinary($this)->getData();
         }
 
         return $data;
+    }
+
+    /**
+     * Get SkipData
+     *
+     * @return bool
+     */
+    public function isSkipData()
+    {
+        return $this->skipData;
+    }
+
+    /**
+     * Set SkipData
+     *
+     * @param bool $skipData
+     *
+     * @return $this
+     */
+    public function setSkipData($skipData)
+    {
+        $this->skipData = $skipData;
+
+        return $this;
     }
 }
