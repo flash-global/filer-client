@@ -16,8 +16,11 @@ try {
     $searchBuilder->category()->equal(File::CATEGORY_CLIENT);
     $searchBuilder->category()->equal(File::CATEGORY_SUPPLIER);
     $searchBuilder->context()->key('test 1')->equal('test 1');
-    $searchBuilder->filename()->equal('avatar.png');
 
+    $searchBuilder->context()->key('AAA')->equal('AAA');
+    $searchBuilder->context()->key('CCC')->equal('CCC');
+
+    $searchBuilder->contextCondition('OR');
     $results = $filer->search($searchBuilder);
 
     echo '<pre>';

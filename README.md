@@ -31,7 +31,7 @@ will consume the Beanstalk's pipe and forward messages payload to the Filer API:
 ```
 Filer Client -> Beanstalkd -> api-client-worker.php -> Filer API server
 ```
- 
+
 ### Beanstalkd configuration
 
 Running Beanstalkd is very simple. However, you must pay attention to the `z` option which set the maximum job
@@ -178,6 +178,12 @@ Note that you can search on multiple categories by adding multiple categories fi
 $builder->category()->equal(1);
 $builder->category()->equal(2);
 $builder->category()->equal(3);
+```
+
+Note that you can filter on contexts. By default if you have multiple filter for the contexts, an "AND" condition will be processed. You can choose to do an "OR" condition by making the following filter :
+
+```php
+    $searchBuilder->contextCondition('OR');
 ```
 
 ### Upload a new file

@@ -20,6 +20,27 @@ class SearchBuilder
     }
 
     /**
+     * Set the condition type for the contexts
+     *
+     * @param string $type
+     *
+     * @return $this
+     */
+    public function contextCondition($type = 'AND')
+    {
+        $type = strtoupper($type);
+
+        if (!in_array($type, ['AND', 'OR'])) {
+            throw new FilerException('Type has to be either "AND" or "OR"!');
+        }
+
+        $params = $this->getParams();
+        $params['context_condition'] = $type;
+
+        $this->setParams($params);
+    }
+
+    /**
      * Add a filter the the contexts
      *
      * @return Context
