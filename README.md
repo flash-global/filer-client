@@ -186,6 +186,14 @@ Note that you can filter on contexts. By default if you have multiple filter for
     $searchBuilder->contextCondition('OR');
 ```
 
+You can also search a file by giving an uuid. If you do this king of search you don't need to filter by categories but you still can if you want.
+
+Here is an example on how to search a file with it's uuid :
+
+```php
+$builder->uuid()->equal('bck1:30d6a8ed-f9cf-4a6d-a76e-04ec941d1f45');
+```
+
 ### Upload a new file
 
 You can upload a file instance with `Filer::upload($file, $flags)`:
