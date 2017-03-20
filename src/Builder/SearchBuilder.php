@@ -4,6 +4,7 @@ namespace Fei\Service\Filer\Client\Builder;
 use Fei\Service\Filer\Client\Builder\Fields\Category;
 use Fei\Service\Filer\Client\Builder\Fields\Context;
 use Fei\Service\Filer\Client\Builder\Fields\Filename;
+use Fei\Service\Filer\Client\Builder\Fields\Uuid;
 
 class SearchBuilder
 {
@@ -17,6 +18,16 @@ class SearchBuilder
     public function filename()
     {
         return new Filename($this);
+    }
+
+    /**
+     * Add a filter the the uuid field
+     *
+     * @return Uuid
+     */
+    public function uuid()
+    {
+        return new Uuid($this);
     }
 
     /**
