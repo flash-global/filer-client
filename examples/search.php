@@ -6,18 +6,24 @@ use Fei\Service\Filer\Client\Filer;
 use Fei\ApiClient\Transport\BasicTransport;
 use Fei\Service\Filer\Entity\File;
 
-$filer = new Filer([Filer::OPTION_BASEURL => 'http://127.0.0.1:8020']);
+$filer = new Filer([Filer::OPTION_BASEURL => 'http://10.7.0.1:8020']);
 
 $filer->setTransport(new BasicTransport());
 
 try {
     $searchBuilder = new SearchBuilder();
 
-    $searchBuilder->category()->equal(File::CATEGORY_CLIENT);
+    $searchBuilder->category()->equal(File::CATEGORY_IMG);
     $searchBuilder->category()->equal(File::CATEGORY_SUPPLIER);
     $searchBuilder->context()->key('test 1')->equal('test 1');
-    $searchBuilder->filename()->equal('avatar.png');
 
+    $searchBuilder->context()->key('AAA')->equal('AAA');
+    $searchBuilder->context()->key('CCC')->equal('CCC');
+
+    $searchBuilder->contextCondition('OR');
+
+    $searchBuilder->uuid()->equal('bck1:30d6a8ed-f9cf-4a6d-a76e-04ec941d1f45');
+    
     $results = $filer->search($searchBuilder);
 
     echo '<pre>';

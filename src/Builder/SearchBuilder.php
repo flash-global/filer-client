@@ -4,6 +4,7 @@ namespace Fei\Service\Filer\Client\Builder;
 use Fei\Service\Filer\Client\Builder\Fields\Category;
 use Fei\Service\Filer\Client\Builder\Fields\Context;
 use Fei\Service\Filer\Client\Builder\Fields\Filename;
+use Fei\Service\Filer\Client\Builder\Fields\Uuid;
 
 class SearchBuilder
 {
@@ -17,6 +18,37 @@ class SearchBuilder
     public function filename()
     {
         return new Filename($this);
+    }
+
+    /**
+     * Add a filter the the uuid field
+     *
+     * @return Uuid
+     */
+    public function uuid()
+    {
+        return new Uuid($this);
+    }
+
+    /**
+     * Set the condition type for the contexts
+     *
+     * @param string $type
+     *
+     * @return $this
+     */
+    public function contextCondition($type = 'AND')
+    {
+        $type = strtoupper($type);
+
+        if (!in_array($type, ['AND', 'OR'])) {
+            throw new FilerException('Type has to be either "AND" or "OR"!');
+        }
+
+        $params = $this->getParams();
+        $params['context_condition'] = $type;
+
+        $this->setParams($params);
     }
 
     /**
