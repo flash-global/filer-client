@@ -23,6 +23,8 @@ class Filer extends AbstractApiClient implements FilerInterface
 {
     const API_FILER_PATH_INFO = '/api/files';
 
+    const FILER_SHOW_FILE = 1;
+
     public function search(SearchBuilder $builder)
     {
         $request = (new RequestDescriptor())
@@ -168,7 +170,7 @@ class Filer extends AbstractApiClient implements FilerInterface
     /**
      * {@inheritdoc}
      */
-    public function serve($uuid)
+    public function serve($uuid, $flags = 0)
     {
         if (!$this->getTransport()) {
             throw new FilerException('Synchronous Transport has to be set');
@@ -191,9 +193,13 @@ class Filer extends AbstractApiClient implements FilerInterface
             $value = $fp;
             $stat = fstat($fp); // getting information about the resource
 
-            header('Content-Type: application/octet-stream');
-            header("Content-Transfer-Encoding: Binary");
-            header('Content-disposition: attachment; filename="' . $file->getFilename() . '"');
+            if ($flags & self::FILER_SHOW_FILE) {
+                header('Content-Type: ' . $file->getContentType());
+                header('Content-Disposition: inline; filename="' . $file->getFilename() . '"');
+            } else {
+                header('Content-disposition: attachment; filename="' . $file->getFilename() . '"');
+            }
+            //header('Content-Type: application/octet-stream');
 
             if (isset($stat['size'])) {
                 header('Content-Length: ' . $stat['size']);
@@ -308,7 +314,12 @@ class Filer extends AbstractApiClient implements FilerInterface
         $response = $this->send($request);
 
         if ($response instanceof ResponseDescriptor) {
-            $file->setData($response->getBody());
+            $fp = fopen('php://temp', 'rb+');
+            fwrite($fp, $response->getBody());
+            fseek($fp, 0);
+            $data = stream_get_contents($fp);
+
+            $file->setData($data);
         }
 
         return $file;
