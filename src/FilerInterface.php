@@ -65,8 +65,11 @@ interface FilerInterface
      * Fetch a file and serve it to download immediately
      *
      * @param string $uuid UUID of the file to serve
+     * @param int $flags
+     *
+     * @return
      */
-    public function serve($uuid);
+    public function serve($uuid, $flags = 0);
 
     /**
      * Save a local copy of a File

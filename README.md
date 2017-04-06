@@ -344,6 +344,8 @@ $filer->save($uuid, __DIR__ . '/../tests/_data/save/file_saved.png');
 
 With the method `Filer::serve($uuid)` you can serve a file to download immediately to user agents.
 
+If you want to show the file instead of download it, you can call the method like this: `Filer::serve($uuid, Filer::FILER_SHOW_FILE)`
+
 #### Example
 
 ```php
