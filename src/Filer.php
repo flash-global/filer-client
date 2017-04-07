@@ -23,8 +23,6 @@ class Filer extends AbstractApiClient implements FilerInterface
 {
     const API_FILER_PATH_INFO = '/api/files';
 
-    const FILER_SHOW_FILE = 1;
-
     public function search(SearchBuilder $builder)
     {
         $request = (new RequestDescriptor())
@@ -187,25 +185,24 @@ class Filer extends AbstractApiClient implements FilerInterface
 
         if ($response instanceof ResponseDescriptor) {
             // transforming string into resource
-            $fp = fopen('php://temp', 'rb+');
+            $fp = fopen('php://temp', 'wb+');
             fwrite($fp, $response->getBody());
             fseek($fp, 0);
-            $value = $fp;
             $stat = fstat($fp); // getting information about the resource
 
-            if ($flags & self::FILER_SHOW_FILE) {
-                header('Content-Type: ' . $file->getContentType());
-                header('Content-Disposition: inline; filename="' . $file->getFilename() . '"');
-            } else {
+            header('Content-Type: ' . $file->getContentType());
+
+            if ($flags & self::FORCE_DOWNLOAD) {
                 header('Content-disposition: attachment; filename="' . $file->getFilename() . '"');
+            } else {
+                header('Content-Disposition: inline; filename="' . $file->getFilename() . '"');
             }
-            //header('Content-Type: application/octet-stream');
 
             if (isset($stat['size'])) {
                 header('Content-Length: ' . $stat['size']);
             }
 
-            $this->fpassthru($value);
+            $this->fpassthru($fp);
         }
     }
 
