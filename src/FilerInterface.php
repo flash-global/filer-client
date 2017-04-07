@@ -71,7 +71,7 @@ interface FilerInterface
      *
      * @return
      */
-    public function serve($uuid, $flags = 0);
+    public function serve($uuid, $flags = Filer::FORCE_DOWNLOAD);
 
     /**
      * Save a local copy of a File
