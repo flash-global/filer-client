@@ -15,6 +15,7 @@ interface FilerInterface
     const ASYNC_UPLOAD = 2;
     const NEW_REVISION = 4;
     const FORCE_DOWNLOAD = 1;
+    const FORCE_INLINE = 0;
 
     /**
      * Search for files

@@ -168,7 +168,7 @@ class Filer extends AbstractApiClient implements FilerInterface
     /**
      * {@inheritdoc}
      */
-    public function serve($uuid, $flags = 0)
+    public function serve($uuid, $flags = self::FORCE_DOWNLOAD)
     {
         if (!$this->getTransport()) {
             throw new FilerException('Synchronous Transport has to be set');
