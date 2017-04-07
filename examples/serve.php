@@ -18,7 +18,7 @@ try {
     );
 
     // download the file
-    $filer->serve($uuid);
+    $filer->serve($uuid, Filer::FORCE_DOWNLOAD);
 } catch (\Exception $e) {
     echo $e->getMessage() . PHP_EOL;
     $previous = $e->getPrevious();
