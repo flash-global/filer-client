@@ -168,7 +168,7 @@ class Filer extends AbstractApiClient implements FilerInterface
     /**
      * {@inheritdoc}
      */
-    public function serve($uuid)
+    public function serve($uuid, $flags = self::FORCE_DOWNLOAD)
     {
         if (!$this->getTransport()) {
             throw new FilerException('Synchronous Transport has to be set');
@@ -185,21 +185,24 @@ class Filer extends AbstractApiClient implements FilerInterface
 
         if ($response instanceof ResponseDescriptor) {
             // transforming string into resource
-            $fp = fopen('php://temp', 'rb+');
+            $fp = fopen('php://temp', 'wb+');
             fwrite($fp, $response->getBody());
             fseek($fp, 0);
-            $value = $fp;
             $stat = fstat($fp); // getting information about the resource
 
-            header('Content-Type: application/octet-stream');
-            header("Content-Transfer-Encoding: Binary");
-            header('Content-disposition: attachment; filename="' . $file->getFilename() . '"');
+            header('Content-Type: ' . $file->getContentType());
+
+            if ($flags & self::FORCE_DOWNLOAD) {
+                header('Content-disposition: attachment; filename="' . $file->getFilename() . '"');
+            } else {
+                header('Content-Disposition: inline; filename="' . $file->getFilename() . '"');
+            }
 
             if (isset($stat['size'])) {
                 header('Content-Length: ' . $stat['size']);
             }
 
-            $this->fpassthru($value);
+            $this->fpassthru($fp);
         }
     }
 
@@ -308,7 +311,12 @@ class Filer extends AbstractApiClient implements FilerInterface
         $response = $this->send($request);
 
         if ($response instanceof ResponseDescriptor) {
-            $file->setData($response->getBody());
+            $fp = fopen('php://temp', 'rb+');
+            fwrite($fp, $response->getBody());
+            fseek($fp, 0);
+            $data = stream_get_contents($fp);
+
+            $file->setData($data);
         }
 
         return $file;

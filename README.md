@@ -342,7 +342,9 @@ $filer->save($uuid, __DIR__ . '/../tests/_data/save/file_saved.png');
 
 ### Serve a file
 
-With the method `Filer::serve($uuid)` you can serve a file to download immediately to user agents.
+With the method `Filer::serve($uuid, $flag = Filer::FORCE_DOWNLOAD)` you can serve a file to user agents and force the download.
+
+If you don't want to download the file and show it, you can call the method like this: `Filer::serve($uuid, Filer::FORCE_INLINE)`
 
 #### Example
 

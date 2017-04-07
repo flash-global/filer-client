@@ -14,6 +14,8 @@ interface FilerInterface
 {
     const ASYNC_UPLOAD = 2;
     const NEW_REVISION = 4;
+    const FORCE_DOWNLOAD = 1;
+    const FORCE_INLINE = 0;
 
     /**
      * Search for files
@@ -65,8 +67,11 @@ interface FilerInterface
      * Fetch a file and serve it to download immediately
      *
      * @param string $uuid UUID of the file to serve
+     * @param int $flags
+     *
+     * @return
      */
-    public function serve($uuid);
+    public function serve($uuid, $flags = Filer::FORCE_DOWNLOAD);
 
     /**
      * Save a local copy of a File
