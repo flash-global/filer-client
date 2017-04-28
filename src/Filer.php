@@ -362,10 +362,4 @@ class Filer extends AbstractApiClient implements FilerInterface
         fpassthru($resource);
         exit;
     }
-
-
-    protected function filterResults($Files, $filters)
-    {
-        
-    }
 }
