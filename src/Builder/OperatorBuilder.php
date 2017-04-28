@@ -72,7 +72,7 @@ abstract class OperatorBuilder implements FieldInterface
      */
     public function in(array $values)
     {
-        $this->build("('" . implode("','", $values) . "')", 'IN');
+        $this->build($values, 'IN');
 
         return $this;
     }
