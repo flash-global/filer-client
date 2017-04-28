@@ -16,7 +16,6 @@ use Fei\Service\Filer\Client\Exception\FilerException;
 use Fei\Service\Filer\Client\Exception\ValidationException;
 use Fei\Service\Filer\Client\Filer;
 use Fei\Service\Filer\Client\Service\FileWrapper;
-use Fei\Service\Filer\Entity\Context;
 use Fei\Service\Filer\Entity\File;
 use Guzzle\Http\Exception\BadResponseException;
 use Guzzle\Http\Message\Response;
@@ -652,8 +651,6 @@ JSON
             ->setRevision(2)
             ->setCategory(3)
             ->setFilename('fake-filename')
-            ->setContexts(['context1' => 'test',
-                           'context2'=> 'testtest'])
             ->toArray();
 
         $transport = $this->createMock(SyncTransportInterface::class);
