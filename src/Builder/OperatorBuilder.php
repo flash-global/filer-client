@@ -66,12 +66,17 @@ abstract class OperatorBuilder implements FieldInterface
         return $this;
     }
 
+    /**
+     * @param array $values
+     * @return $this
+     */
     public function in(array $values)
     {
-        $this->build("('". implode("','" , $values). "')",'IN');
+        $this->build("('" . implode("','", $values) . "')", 'IN');
 
         return $this;
     }
+
     /**
      * Get InCache
      *

@@ -16,7 +16,7 @@ $filer = new Filer([Filer::OPTION_BASEURL => 'http://filer.test.flash-global.net
 $filer->setTransport(new BasicTransport());
 $searchBuilder = new SearchBuilder();
 $searchBuilder->category()->equal(File::CATEGORY_CLIENT);
-//$searchBuilder->context()->key('context')->equal('dossier');
+$searchBuilder->context()->key('context')->equal('dossier');
 $searchBuilder->context()->key('contextKey')->in(['IN1704CFC5','RG1704CF4H']);
 $fw = $filer->search($searchBuilder);
 var_dump($fw);
