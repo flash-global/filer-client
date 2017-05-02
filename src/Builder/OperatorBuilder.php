@@ -67,6 +67,19 @@ abstract class OperatorBuilder implements FieldInterface
     }
 
     /**
+     * Set the in operator for the current filer
+     *
+     * @param array $values
+     * @return $this
+     */
+    public function in(array $values)
+    {
+        $this->build($values, 'IN');
+
+        return $this;
+    }
+
+    /**
      * Get InCache
      *
      * @return mixed

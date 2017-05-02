@@ -23,7 +23,7 @@ try {
     $searchBuilder->contextCondition('OR');
 
     $searchBuilder->uuid()->equal('bck1:30d6a8ed-f9cf-4a6d-a76e-04ec941d1f45');
-    
+
     $results = $filer->search($searchBuilder);
 
     echo '<pre>';
