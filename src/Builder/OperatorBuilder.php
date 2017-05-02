@@ -67,6 +67,8 @@ abstract class OperatorBuilder implements FieldInterface
     }
 
     /**
+     * Set the in operator for the current filer
+     *
      * @param array $values
      * @return $this
      */
