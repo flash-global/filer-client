@@ -281,6 +281,17 @@ class FilerTest extends Unit
         $filer->retrieve('test');
     }
 
+    public function testRetrieveFileDoesNotExist()
+    {
+        $filer = $this->createMock('Fei\Service\Filer\Client\Filer');
+
+        $filer->method('fetch')->willThrowException(new \Exception);
+
+        $return = $filer->retrieve('abcd:aca798ec-032b-481e-8514-561867d7ecdb');
+
+        $this->assertNull($return);
+    }
+
     public function testRetrieve()
     {
         $filer = new Filer([Filer::OPTION_BASEURL => 'http://url']);
