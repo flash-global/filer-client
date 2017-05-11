@@ -107,7 +107,11 @@ class Filer extends AbstractApiClient implements FilerInterface
         try {
             $file = $this->fetch($request);
         } catch (\Exception $e) {
-            $file = null;
+            if ($e->getPrevious() != null && $e->getPrevious()->getPrevious() instanceof \Guzzle\Http\Exception\BadResponseException && $e->getCode() == 404) {
+                $file = null;
+            } else {
+                throw $e;
+            }
         }
 
         return $file;

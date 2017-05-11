@@ -283,9 +283,20 @@ class FilerTest extends Unit
 
     public function testRetrieveFileDoesNotExist()
     {
-        $filer = $this->createMock('Fei\Service\Filer\Client\Filer');
+        $transport = $this->createMock(SyncTransportInterface::class);
 
-        $filer->method('fetch')->willThrowException(new \Exception);
+        $filer = $this->getMockBuilder(Filer::class)
+            ->setMethods(['fetch'])
+            ->getMock();
+
+        $filer->setTransport($transport);
+
+        $badResponseException = new \Guzzle\Http\Exception\BadResponseException('BadResponseException');
+        $apiClientException = new ApiClientException('An error occurred while transporting a request', 0, $badResponseException);
+        $filerException = new FilerException('File not found', 404, $apiClientException);
+        $filer->expects($this->once())
+            ->method('fetch')
+            ->willThrowException($filerException);
 
         $return = $filer->retrieve('abcd:aca798ec-032b-481e-8514-561867d7ecdb');
 
