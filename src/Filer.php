@@ -104,7 +104,15 @@ class Filer extends AbstractApiClient implements FilerInterface
             ->setUrl($this->buildUrl(self::API_FILER_PATH_INFO . '?uuid=' . urlencode($uuid)));
 
         /** @var File $file */
-        $file = $this->fetch($request);
+        try {
+            $file = $this->fetch($request);
+        } catch (\Exception $e) {
+            if ($e->getPrevious() != null && $e->getPrevious()->getPrevious() instanceof \Guzzle\Http\Exception\BadResponseException && $e->getCode() == 404) {
+                $file = null;
+            } else {
+                throw $e;
+            }
+        }
 
         return $file;
     }
