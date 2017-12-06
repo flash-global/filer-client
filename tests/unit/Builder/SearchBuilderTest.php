@@ -54,7 +54,7 @@ class SearchBuilderTest extends Unit
         
         $this->assertInstanceOf(Filename::class, $builder->__call('filename', null));
 
-        $this->expectException(\Exception::class);
+        $this->setExpectedException(\Exception::class);
 
         $builder->fakeMethode();
     }
