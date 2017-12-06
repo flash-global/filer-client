@@ -57,8 +57,7 @@ class FilerTest extends TestCase
     {
         $filer = new Filer();
 
-        $this->expectException(ValidationException::class);
-        $this->expectExceptionMessageRegExp('/^File entity is not valid: \(.*\)/');
+        $this->setExpectedException(ValidationException::class);
 
         $filer->upload(new File());
     }
@@ -67,8 +66,7 @@ class FilerTest extends TestCase
     {
         $filer = new Filer();
 
-        $this->expectException(FilerException::class);
-        $this->expectExceptionMessage('Asynchronous Transport has to be set');
+        $this->setExpectedException(FilerException::class, 'Asynchronous Transport has to be set');
 
         $filer->upload($this->getValidFileInstance(), Filer::ASYNC_UPLOAD);
     }
@@ -80,7 +78,7 @@ class FilerTest extends TestCase
         $request = new RequestDescriptor();
         $flag = null;
 
-        $transport = $this->createMock(AsyncTransportInterface::class);
+        $transport = $this->getMockBuilder(AsyncTransportInterface::class)->getMockForAbstractClass();
         $transport->expects($this->once())->method('send')->willReturnCallback(
             function (RequestDescriptor $requestDescriptor, $mFlag) use (&$request, &$flag, $transport) {
                 $request = $requestDescriptor;
@@ -113,7 +111,7 @@ class FilerTest extends TestCase
             ->getMock();
         $filer->expects($this->once())->method('createUuid')->willReturn('bck1:22b52127-7dbd-4294-81f4-8638906c646a');
 
-        $transport = $this->createMock(AsyncTransportInterface::class);
+        $transport = $this->getMockBuilder(AsyncTransportInterface::class)->getMockForAbstractClass();
         $transport->expects($this->once())->method('send')->willReturnCallback(
             function (RequestDescriptor $requestDescriptor, $mFlag) use (&$request, &$flag, $transport) {
                 $request = $requestDescriptor;
@@ -143,10 +141,10 @@ class FilerTest extends TestCase
     {
         $filer = new Filer([Filer::OPTION_BASEURL => 'http://url']);
 
-        $transport = $this->createMock(AsyncTransportInterface::class);
+        $transport = $this->getMockBuilder(AsyncTransportInterface::class)->getMockForAbstractClass();
         $transport->expects($this->once())->method('send')->willThrowException(new TransportException());
 
-        $this->expectException(FilerException::class);
+        $this->setExpectedException(FilerException::class);
 
         $filer->setAsyncTransport($transport);
 
@@ -160,7 +158,7 @@ class FilerTest extends TestCase
         $request = new RequestDescriptor();
         $flag = null;
 
-        $transport = $this->createMock(SyncTransportInterface::class);
+        $transport = $this->getMockBuilder(SyncTransportInterface::class)->getMockForAbstractClass();
         $transport->expects($this->once())->method('send')->willReturnCallback(
             function (RequestDescriptor $requestDescriptor, $mFlag) use (&$request, &$flag, $transport) {
                 $request = $requestDescriptor;
@@ -192,8 +190,7 @@ class FilerTest extends TestCase
     {
         $filer = new Filer();
 
-        $this->expectException(ValidationException::class);
-        $this->expectExceptionMessage('UUID must be set when adding a new revision');
+        $this->setExpectedException(ValidationException::class, 'UUID must be set when adding a new revision');
 
         $file = $this->getValidFileInstance();
         $file->setUuid(null);
@@ -208,7 +205,7 @@ class FilerTest extends TestCase
         $request = new RequestDescriptor();
         $flag = null;
 
-        $transport = $this->createMock(AsyncTransportInterface::class);
+        $transport = $this->getMockBuilder(AsyncTransportInterface::class)->getMockForAbstractClass();
         $transport->expects($this->once())->method('send')->willReturnCallback(
             function (RequestDescriptor $requestDescriptor, $mFlag) use (&$request, &$flag, $transport) {
                 $request = $requestDescriptor;
@@ -240,7 +237,7 @@ class FilerTest extends TestCase
         $request = new RequestDescriptor();
         $flag = null;
 
-        $transport = $this->createMock(AsyncTransportInterface::class);
+        $transport = $this->getMockBuilder(AsyncTransportInterface::class)->getMockForAbstractClass();
         $transport->expects($this->once())->method('send')->willReturnCallback(
             function (RequestDescriptor $requestDescriptor, $mFlag) use (&$request, &$flag, $transport) {
                 $request = $requestDescriptor;
@@ -272,7 +269,7 @@ class FilerTest extends TestCase
         $request = new RequestDescriptor();
         $flag = null;
 
-        $transport = $this->createMock(SyncTransportInterface::class);
+        $transport = $this->getMockBuilder(SyncTransportInterface::class)->getMockForAbstractClass();
         $transport->expects($this->once())->method('send')->willReturnCallback(
             function (RequestDescriptor $requestDescriptor, $mFlag) use (&$request, &$flag, $transport) {
                 $request = $requestDescriptor;
@@ -301,15 +298,14 @@ class FilerTest extends TestCase
     {
         $filer = new Filer();
 
-        $this->expectException(FilerException::class);
-        $this->expectExceptionMessage('Synchronous Transport has to be set');
+        $this->setExpectedException(FilerException::class, 'Synchronous Transport has to be set');
 
         $filer->retrieve('test');
     }
 
     public function testRetrieveFileDoesNotExist()
     {
-        $transport = $this->createMock(SyncTransportInterface::class);
+        $transport = $this->getMockBuilder(SyncTransportInterface::class)->getMockForAbstractClass();
 
         $filer = $this->getMockBuilder(Filer::class)
             ->setMethods(['fetch'])
@@ -318,7 +314,11 @@ class FilerTest extends TestCase
         $filer->setTransport($transport);
 
         $badResponseException = new RequestException('BadResponseException', new Request('GET', 'test'));
-        $apiClientException = new ApiClientException('An error occurred while transporting a request', 0, $badResponseException);
+        $apiClientException = new ApiClientException(
+            'An error occurred while transporting a request',
+            0,
+            $badResponseException
+        );
 
         $filerException = new FilerException('File not found', 404, $apiClientException);
 
@@ -326,8 +326,7 @@ class FilerTest extends TestCase
             ->method('fetch')
             ->willThrowException($filerException);
 
-        $this->expectException(FilerException::class);
-        $this->expectExceptionMessage('File not found');
+        $this->setExpectedException(FilerException::class, 'File not found');
 
         $return = $filer->retrieve('abcd:aca798ec-032b-481e-8514-561867d7ecdb');
 
@@ -340,7 +339,7 @@ class FilerTest extends TestCase
 
         $request1 = new RequestDescriptor();
 
-        $transport = $this->createMock(SyncTransportInterface::class);
+        $transport = $this->getMockBuilder(SyncTransportInterface::class)->getMockForAbstractClass();
         $transport->expects($this->once())->method('send')->withConsecutive(
             [$this->callback(function (RequestDescriptor $requestDescriptor) use (&$request1) {
                 return $request1 = $requestDescriptor;
@@ -389,8 +388,7 @@ class FilerTest extends TestCase
     {
         $filer = new Filer([Filer::OPTION_BASEURL => 'http://url']);
 
-        $this->expectException(FilerException::class);
-        $this->expectExceptionMessage('Synchronous Transport has to be set');
+        $this->setExpectedException(FilerException::class, 'Synchronous Transport has to be set');
 
         $filer->delete('fake-uuid');
     }
@@ -402,7 +400,7 @@ class FilerTest extends TestCase
         $request = new RequestDescriptor();
         $flag = null;
 
-        $transport = $this->createMock(SyncTransportInterface::class);
+        $transport = $this->getMockBuilder(SyncTransportInterface::class)->getMockForAbstractClass();
         $transport->expects($this->once())->method('send')->willReturnCallback(
             function (RequestDescriptor $requestDescriptor, $mFlag) use (&$request, &$flag, $transport) {
                 $request = $requestDescriptor;
@@ -434,7 +432,7 @@ class FilerTest extends TestCase
         $request = new RequestDescriptor();
         $flag = null;
 
-        $transport = $this->createMock(SyncTransportInterface::class);
+        $transport = $this->getMockBuilder(SyncTransportInterface::class)->getMockForAbstractClass();
         $transport->expects($this->once())->method('send')->willReturnCallback(
             function (RequestDescriptor $requestDescriptor, $mFlag) use (&$request, &$flag, $transport) {
                 $request = $requestDescriptor;
@@ -463,8 +461,7 @@ class FilerTest extends TestCase
     {
         $filer = new Filer([Filer::OPTION_BASEURL => 'http://url']);
 
-        $this->expectException(FilerException::class);
-        $this->expectExceptionMessage('Synchronous Transport has to be set');
+        $this->setExpectedException(FilerException::class, 'Synchronous Transport has to be set');
 
         $filer->truncate('fake-uuid');
     }
@@ -476,7 +473,7 @@ class FilerTest extends TestCase
         $request = new RequestDescriptor();
         $flag = null;
 
-        $transport = $this->createMock(SyncTransportInterface::class);
+        $transport = $this->getMockBuilder(SyncTransportInterface::class)->getMockForAbstractClass();
         $transport->expects($this->once())->method('send')->willReturnCallback(
             function (RequestDescriptor $requestDescriptor, $mFlag) use (&$request, &$flag, $transport) {
                 $request = $requestDescriptor;
@@ -505,8 +502,7 @@ class FilerTest extends TestCase
     {
         $filer = new Filer([Filer::OPTION_BASEURL => 'http://url']);
 
-        $this->expectException(FilerException::class);
-        $this->expectExceptionMessage('Synchronous Transport has to be set');
+        $this->setExpectedException(FilerException::class, 'Synchronous Transport has to be set');
 
         $filer->serve('fake-uuid');
     }
@@ -524,7 +520,7 @@ class FilerTest extends TestCase
             'fpassthru' => null
         ]);
 
-        $transport = $this->createMock(SyncTransportInterface::class);
+        $transport = $this->getMockBuilder(SyncTransportInterface::class)->getMockForAbstractClass();
         $filer->setTransport($transport);
 
         $returned = $filer->serve($file->getUuid());
@@ -542,7 +538,7 @@ class FilerTest extends TestCase
             'retrieve' => $file
         ]);
 
-        $transport = $this->createMock(SyncTransportInterface::class);
+        $transport = $this->getMockBuilder(SyncTransportInterface::class)->getMockForAbstractClass();
         $filer->setTransport($transport);
 
         $returned = $filer->serve($file->getUuid());
@@ -554,8 +550,7 @@ class FilerTest extends TestCase
     {
         $filer = new Filer([Filer::OPTION_BASEURL => 'http://url']);
 
-        $this->expectException(FilerException::class);
-        $this->expectExceptionMessage('Synchronous Transport has to be set');
+        $this->setExpectedException(FilerException::class, 'Synchronous Transport has to be set');
 
         $filer->save('fake-uuid', '/my/path');
     }
@@ -571,7 +566,7 @@ class FilerTest extends TestCase
             'send' => $responseDescriptor
         ]);
 
-        $transport = $this->createMock(SyncTransportInterface::class);
+        $transport = $this->getMockBuilder(SyncTransportInterface::class)->getMockForAbstractClass();
         $filer->setTransport($transport);
 
         $filer->save($file->getUuid(), __DIR__ . '/../_data/');
@@ -596,7 +591,7 @@ class FilerTest extends TestCase
             'send' => $responseDescriptor,
             'retrieve' => $file
         ]);
-        $transport = $this->createMock(SyncTransportInterface::class);
+        $transport = $this->getMockBuilder(SyncTransportInterface::class)->getMockForAbstractClass();
         $filer->setTransport($transport);
 
         $filer->save($file->getUuid(), __DIR__ . '/../_data/');
@@ -628,8 +623,7 @@ class FilerTest extends TestCase
     {
         $filer = new Filer();
 
-        $this->expectException(FilerException::class);
-        $this->expectExceptionMessage('Synchronous Transport has to be set');
+        $this->setExpectedException(FilerException::class, 'Synchronous Transport has to be set');
 
         $filer->createUuid(1);
     }
@@ -652,14 +646,12 @@ JSON
         $previous = new RequestException('test', new Request('POST', 'test'), $response);
         $exception = new ApiClientException('Test', 0, $previous);
 
-        $transport = $this->createMock(SyncTransportInterface::class);
+        $transport = $this->getMockBuilder(SyncTransportInterface::class)->getMockForAbstractClass();
         $transport->expects($this->once())->method('send')->willThrowException($exception);
 
         $filer->setTransport($transport);
 
-        $this->expectException(FilerException::class);
-        $this->expectExceptionCode(400);
-        $this->expectExceptionMessage('Backend not found for this category of file');
+        $this->setExpectedException(FilerException::class, 'Backend not found for this category of file', 400);
 
         $filer->createUuid(10);
     }
@@ -671,7 +663,7 @@ JSON
         $request = new RequestDescriptor();
         $flag = null;
 
-        $transport = $this->createMock(SyncTransportInterface::class);
+        $transport = $this->getMockBuilder(SyncTransportInterface::class)->getMockForAbstractClass();
         $transport->expects($this->once())->method('send')->willReturnCallback(
             function (RequestDescriptor $requestDescriptor, $mFlag) use (&$request, &$flag, $transport) {
                 $request = $requestDescriptor;
@@ -707,7 +699,7 @@ JSON
             ->setFilename('fake-filename')
             ->toArray();
 
-        $transport = $this->createMock(SyncTransportInterface::class);
+        $transport = $this->getMockBuilder(SyncTransportInterface::class)->getMockForAbstractClass();
         $transport->expects($this->once())->method('send')->willReturnCallback(
             function (RequestDescriptor $requestDescriptor, $mFlag) use (&$request, &$flag, $transport, $arr) {
                 $request = $requestDescriptor;
@@ -747,7 +739,7 @@ JSON
 
         $filer = $this->getMockBuilder(Filer::class)
             ->enableOriginalConstructor()
-            ->setMethodsExcept(['uploadByChunks', 'getChunkSize', 'getChunkUploadConcurrency', 'setChunkSize'])
+            ->setMethods(['createUuid', 'getClient'])
             ->getMock();
 
         $filer->setChunkSize(1000);
