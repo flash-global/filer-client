@@ -365,3 +365,47 @@ $uuid = $filer->upload(
 // Serve the file
 $filer->serve($uuid);
 ```
+
+### Upload large files by chunk
+
+From the version 1.1.0 of this client it is possible tu upload large file by chunk. In order to do this, ypu have to use
+the `Filer::uploadByChunk(File $file, callable $fulfilled = null, callable $rejected = null)` method.
+
+#### Example
+
+```php
+<?php
+
+use Fei\Service\Filer\Entity\File;
+use GuzzleHttp\Psr7\Response;
+use GuzzleHttp\Exception\RequestException;
+
+$file = (new File())
+    ->setCategory(File::CATEGORY_IMG)
+    ->setContexts(['test 1' => 'test 1', 'test 2' => 'test 2'])
+    ->setFilename('solr-7.0.1.tgz')
+    ->setFile(new SplFileObject(__DIR__ . 'solr-7.0.1.tgz'));
+
+$filer->uploadByChunks(
+    $file,
+    function (Response $response, $index) {
+        var_dump($index);
+    },
+    function (RequestException $reason, $index) {
+        echo $reason->getMessage(); die();
+    }
+);
+```
+
+`$fulfilled` callback will be executed each time a chunk is transmitted successfully. Otherwise `$rejected` callback
+will be executed each time a chunk is not transmitted successfully.
+
+By default, `$rejected` is equal to:
+
+```php
+function (RequestException $reason, $index) {
+    throw FilerException::createWithRequestException($reason);
+};
+```
+
+You could set the chunk size and the Upload concurrency with respectively the options `OPTION_CHUNK_SIZE` and `OPTION_CHUNK_UPLOAD_CONCURRENCY`.

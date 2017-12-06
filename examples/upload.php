@@ -1,6 +1,7 @@
 <?php
 
 use Fei\ApiClient\Transport\BasicTransport;
+use Fei\Service\Filer\Client\Exception\FilerException;
 use Fei\Service\Filer\Client\Filer;
 use Fei\Service\Filer\Entity\File;
 
@@ -38,11 +39,8 @@ try {
 
     echo (is_string($uuid) ? $uuid : (string) $uuid->getBody()) . PHP_EOL;
 
+} catch (FilerException $e) {
+    echo $e->getMessage() . PHP_EOL;
 } catch (\Exception $e) {
     echo $e->getMessage() . PHP_EOL;
-    $previous = $e->getPrevious();
-    if ($previous instanceof Guzzle\Http\Exception\ServerErrorResponseException) {
-        var_dump($previous->getRequest());
-        var_dump($previous->getResponse()->getBody(true));
-    }
 }

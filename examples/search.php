@@ -2,11 +2,12 @@
 require __DIR__ . '/../vendor/autoload.php';
 
 use Fei\Service\Filer\Client\Builder\SearchBuilder;
+use Fei\Service\Filer\Client\Exception\FilerException;
 use Fei\Service\Filer\Client\Filer;
 use Fei\ApiClient\Transport\BasicTransport;
 use Fei\Service\Filer\Entity\File;
 
-$filer = new Filer([Filer::OPTION_BASEURL => 'http://10.7.0.1:8020']);
+$filer = new Filer([Filer::OPTION_BASEURL => 'http://127.0.0.1:8020']);
 
 $filer->setTransport(new BasicTransport());
 
@@ -29,11 +30,8 @@ try {
     echo '<pre>';
     print_r($results);
     echo '</pre>';
+} catch (FilerException $e) {
+    echo $e->getMessage() . PHP_EOL;
 } catch (\Exception $e) {
     echo $e->getMessage() . PHP_EOL;
-    $previous = $e->getPrevious();
-    if ($previous instanceof Guzzle\Http\Exception\ServerErrorResponseException) {
-        var_dump($previous->getRequest());
-        var_dump($previous->getResponse()->getBody(true));
-    }
 }

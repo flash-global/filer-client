@@ -3,6 +3,7 @@
 namespace Fei\Service\Filer\Client;
 
 use Fei\ApiClient\AbstractApiClient;
+use Fei\ApiClient\ApiClientException;
 use Fei\ApiClient\ApiRequestOption;
 use Fei\ApiClient\RequestDescriptor;
 use Fei\ApiClient\ResponseDescriptor;
@@ -12,7 +13,10 @@ use Fei\Service\Filer\Client\Exception\ValidationException;
 use Fei\Service\Filer\Client\Service\FileWrapper;
 use Fei\Service\Filer\Entity\File;
 use Fei\Service\Filer\Validator\FileValidator;
-use Guzzle\Http\Exception\BadResponseException;
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\RequestException;
+use GuzzleHttp\Pool;
+use GuzzleHttp\Psr7\Request;
 
 /**
  * Class Filer
@@ -23,6 +27,26 @@ class Filer extends AbstractApiClient implements FilerInterface
 {
     const API_FILER_PATH_INFO = '/api/files';
 
+    const API_CHUNK_UPLOAD_PATH_INFO = '/api/upload';
+
+    /** Chunk size in octet (2 Mo) */
+    const OPTION_CHUNK_SIZE = 'chunkSize';
+
+    const OPTION_CHUNK_UPLOAD_CONCURRENCY = 'chunkUploadConcurrency';
+
+    /**
+     * @var int Chunk size in octet
+     */
+    protected $chunkSize = 2097152;
+
+    /**
+     * @var int
+     */
+    protected $chunkUploadConcurrency = 5;
+
+    /**
+     * {@inheritdoc}
+     */
     public function search(SearchBuilder $builder)
     {
         $request = (new RequestDescriptor())
@@ -93,6 +117,108 @@ class Filer extends AbstractApiClient implements FilerInterface
     /**
      * {@inheritdoc}
      */
+    public function uploadByChunks(File $file, callable $fulfilled = null, callable $rejected = null)
+    {
+        if (is_null($rejected)) {
+            $rejected = function (RequestException $reason, $index) {
+                throw FilerException::createWithRequestException($reason);
+            };
+        }
+
+        $uuid = empty($file->getUuid()) ? $this->createUuid($file->getCategory()) : $file->getUuid();
+
+        $file->setUuid($uuid);
+
+        $uri = $this->buildUrl(self::API_CHUNK_UPLOAD_PATH_INFO);
+
+        $totalChunks = ceil($file->getFile()->getSize() / $this->getChunkSize());
+        $secret = md5(uniqid(rand(), true));
+
+        $createChunkBody = function (File $file, $chunkPosition = 1, $cursorPosition = 0) use ($secret, $totalChunks, $uuid) {
+            $file->getFile()->fseek($cursorPosition);
+            $chunk = $file->getFile()->fread($this->getChunkSize());
+            $chunkBase64 = base64_encode($chunk);
+
+            $body = [
+                'chunk' => $chunkBase64,
+                'chunkPosition' => $chunkPosition,
+                'md5' => md5($chunkBase64),
+                'octets' => strlen($chunk),
+                'secret' => $secret,
+                'totalChunkNumber' => $totalChunks,
+                'uuid' => $uuid
+            ];
+
+            if ($chunkPosition == 1) {
+                $body['file'] = [
+                    'contentType' => $file->getContentType(),
+                    'filename' => $file->getFilename(),
+                    'size' => $file->getFile()->getSize(),
+                    'form' => http_build_query([
+                        'category' => $file->getCategory(),
+                        'contexts' => $file->getContexts()->toArray()
+                    ])
+                ];
+            }
+
+            return $body;
+        };
+
+        $file->getFile()->rewind();
+
+        $client = $this->getClient();
+
+        try {
+            $response = $client->send(
+                new Request(
+                    'POST',
+                    $uri,
+                    ['Content-Type' => 'application/x-www-form-urlencoded; charset=UTF-8'],
+                    http_build_query($createChunkBody($file))
+                )
+            );
+
+            if (is_callable($fulfilled)) {
+                $fulfilled($response, 1);
+            }
+        } catch (RequestException $e) {
+            $rejected($e, 1);
+        }
+
+        if ($totalChunks > 1) {
+            $request = function (File $file) use ($uri, $createChunkBody) {
+                $chunkPosition = 1;
+                $cursorPosition = 0;
+
+                while (!$file->getFile()->eof()) {
+                    $chunkPosition++;
+                    $cursorPosition += $this->getChunkSize();
+
+                    yield new Request(
+                        'POST',
+                        $uri,
+                        ['Content-Type' => 'application/x-www-form-urlencoded; charset=UTF-8'],
+                        http_build_query($createChunkBody($file, $chunkPosition, $cursorPosition))
+                    );
+                }
+            };
+
+            $pool = new Pool($client, $request($file), [
+                'concurrency' => $this->getChunkUploadConcurrency(),
+                'fulfilled' => $fulfilled,
+                'rejected' => $rejected
+            ]);
+
+            $promise = $pool->promise();
+            $promise->wait();
+        }
+
+        return $file->getUuid();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function retrieve($uuid)
     {
         if (!$this->getTransport()) {
@@ -107,7 +233,10 @@ class Filer extends AbstractApiClient implements FilerInterface
         try {
             $file = $this->fetch($request);
         } catch (\Exception $e) {
-            if ($e->getPrevious() != null && $e->getPrevious()->getPrevious() instanceof \Guzzle\Http\Exception\BadResponseException && $e->getCode() == 404) {
+            if ($e->getPrevious() != null
+                && $e->getPrevious()->getPrevious() instanceof \Guzzle\Http\Exception\BadResponseException
+                && $e->getCode() == 404
+            ) {
                 $file = null;
             } else {
                 throw $e;
@@ -255,7 +384,7 @@ class Filer extends AbstractApiClient implements FilerInterface
             $response = parent::send($request, $flags);
 
             if ($response instanceof ResponseDescriptor) {
-                $body = \json_decode($response->getBody(), true);
+                $body = \json_decode((string) $response->getBody(), true);
 
                 if (isset($body['uuid'])) {
                     return $body['uuid'];
@@ -267,13 +396,11 @@ class Filer extends AbstractApiClient implements FilerInterface
 
                 return $response;
             }
-        } catch (\Exception $e) {
-            $previous = $e->getPrevious();
-            if ($previous instanceof BadResponseException) {
-                $data = \json_decode($previous->getResponse()->getBody(true), true);
-                if (isset($data['code']) && isset($data['error'])) {
-                    throw new FilerException($data['error'], $data['code'], $e);
-                }
+        } catch (ApiClientException $e) {
+            $requestException = $e->getRequestException();
+
+            if (!is_null($requestException)) {
+                throw FilerException::createWithRequestException($requestException);
             }
 
             throw new FilerException($e->getMessage(), $e->getCode(), $e);
@@ -369,5 +496,63 @@ class Filer extends AbstractApiClient implements FilerInterface
         // streaming the content of the file
         fpassthru($resource);
         exit;
+    }
+
+    /**
+     * Returns the Guzzle client
+     *
+     * @return Client
+     */
+    public function getClient()
+    {
+        return new Client();
+    }
+
+    /**
+     * Get ChunkSize
+     *
+     * @return int
+     */
+    public function getChunkSize()
+    {
+        return $this->chunkSize;
+    }
+
+    /**
+     * Set ChunkSize
+     *
+     * @param int $chunkSize
+     *
+     * @return $this
+     */
+    public function setChunkSize($chunkSize)
+    {
+        $this->chunkSize = $chunkSize;
+
+        return $this;
+    }
+
+    /**
+     * Get ChunkUploadConcurrency
+     *
+     * @return int
+     */
+    public function getChunkUploadConcurrency()
+    {
+        return $this->chunkUploadConcurrency;
+    }
+
+    /**
+     * Set ChunkUploadConcurrency
+     *
+     * @param int $chunkUploadConcurrency
+     *
+     * @return $this
+     */
+    public function setChunkUploadConcurrency($chunkUploadConcurrency)
+    {
+        $this->chunkUploadConcurrency = $chunkUploadConcurrency;
+
+        return $this;
     }
 }
