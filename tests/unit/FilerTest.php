@@ -2,7 +2,6 @@
 
 namespace Tests\Fei\Service\Filer\Client;
 
-use Codeception\Test\Unit;
 use Codeception\Util\Stub;
 use Fei\ApiClient\ApiClientException;
 use Fei\ApiClient\RequestDescriptor;
@@ -17,16 +16,43 @@ use Fei\Service\Filer\Client\Exception\ValidationException;
 use Fei\Service\Filer\Client\Filer;
 use Fei\Service\Filer\Client\Service\FileWrapper;
 use Fei\Service\Filer\Entity\File;
-use Guzzle\Http\Exception\BadResponseException;
-use Guzzle\Http\Message\Response;
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\RequestException;
+use GuzzleHttp\Psr7\Request;
+use GuzzleHttp\Psr7\Response;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Class FilerTest
  *
  * @package Tests\Fei\Service\Filer\Client
  */
-class FilerTest extends Unit
+class FilerTest extends TestCase
 {
+    public function testChunkSizeAccessors()
+    {
+        $filer = new Filer();
+
+        $this->assertEquals(2 * 1024 * 1024, $filer->getChunkSize());
+
+        $filer->setChunkSize(10);
+
+        $this->assertEquals(10, $filer->getChunkSize());
+        $this->assertAttributeEquals($filer->getChunkSize(), 'chunkSize', $filer);
+    }
+
+    public function testChunkUploadConcurrencyAccessors()
+    {
+        $filer = new Filer();
+
+        $this->assertEquals(5, $filer->getChunkUploadConcurrency());
+
+        $filer->setChunkUploadConcurrency(10);
+
+        $this->assertEquals(10, $filer->getChunkUploadConcurrency());
+        $this->assertAttributeEquals($filer->getChunkUploadConcurrency(), 'chunkUploadConcurrency', $filer);
+    }
+
     public function testUploadFileNotValid()
     {
         $filer = new Filer();
@@ -279,6 +305,33 @@ class FilerTest extends Unit
         $this->expectExceptionMessage('Synchronous Transport has to be set');
 
         $filer->retrieve('test');
+    }
+
+    public function testRetrieveFileDoesNotExist()
+    {
+        $transport = $this->createMock(SyncTransportInterface::class);
+
+        $filer = $this->getMockBuilder(Filer::class)
+            ->setMethods(['fetch'])
+            ->getMock();
+
+        $filer->setTransport($transport);
+
+        $badResponseException = new RequestException('BadResponseException', new Request('GET', 'test'));
+        $apiClientException = new ApiClientException('An error occurred while transporting a request', 0, $badResponseException);
+
+        $filerException = new FilerException('File not found', 404, $apiClientException);
+
+        $filer->expects($this->once())
+            ->method('fetch')
+            ->willThrowException($filerException);
+
+        $this->expectException(FilerException::class);
+        $this->expectExceptionMessage('File not found');
+
+        $return = $filer->retrieve('abcd:aca798ec-032b-481e-8514-561867d7ecdb');
+
+        $this->assertNull($return);
     }
 
     public function testRetrieve()
@@ -585,8 +638,7 @@ class FilerTest extends Unit
     {
         $filer = new Filer([Filer::OPTION_BASEURL => 'http://url']);
 
-        $previous = new BadResponseException();
-        $previous->setResponse(new Response(400, [], <<<JSON
+        $response = new Response(400, [], <<<JSON
 {
    "code": 400,
    "error": "Backend not found for this category of file",
@@ -595,7 +647,9 @@ class FilerTest extends Unit
    "line": 191
 }
 JSON
-        ));
+        );
+
+        $previous = new RequestException('test', new Request('POST', 'test'), $response);
         $exception = new ApiClientException('Test', 0, $previous);
 
         $transport = $this->createMock(SyncTransportInterface::class);
@@ -683,6 +737,32 @@ JSON
             new \SplFileObject(__DIR__ . '/../_data/avatar.png'),
             $file->getFile()
         );
+    }
+
+    public function testUploadByChunkCreateUuid()
+    {
+        $file = (new File())
+            ->setCategory(File::CATEGORY_IMG)
+            ->setFile(new \SplFileObject(__DIR__ . '/../_data/avatar.png'));
+
+        $filer = $this->getMockBuilder(Filer::class)
+            ->enableOriginalConstructor()
+            ->setMethodsExcept(['uploadByChunks', 'getChunkSize', 'getChunkUploadConcurrency', 'setChunkSize'])
+            ->getMock();
+
+        $filer->setChunkSize(1000);
+
+        $client = $this->getMockBuilder(Client::class)
+            ->getMock();
+
+        $client->method('sendAsync')->willReturn(new Response());
+
+        $filer->expects($this->once())->method('createUuid')->with($file->getCategory())->willReturn('uuid');
+        $filer->expects($this->once())->method('getClient')->willReturn($client);
+
+        $filer->uploadByChunks($file);
+
+        $this->assertEquals('uuid', $file->getUuid());
     }
 
     /**
