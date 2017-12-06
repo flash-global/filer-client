@@ -40,6 +40,15 @@ interface FilerInterface
     public function upload(File $file, $flags = null);
 
     /**
+     * Upload a file by chunk
+     *
+     * @param File $file
+     *
+     * @return string Return the UUID of the uploaded File
+     */
+    public function uploadByChunks(File $file);
+
+    /**
      * Restore a file
      *
      * @param string $uuid UUID of the file to be fetch
