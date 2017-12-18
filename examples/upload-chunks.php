@@ -42,7 +42,6 @@ try {
     echo $uuid . PHP_EOL;
 
     $file = $filer->retrieve($uuid);
-
     $file->setContexts(['test 1' => 'New value']);
 
     $uuid = $filer->uploadByChunks(
