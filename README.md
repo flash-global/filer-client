@@ -117,15 +117,16 @@ will try to send File payload directly to the right API endpoint.
 
 There are several methods in `Filer` class, all listed in the following table:
 
-| Method  | Parameters                                 | Return             |
-|---------|--------------------------------------------|--------------------|
-|upload   | `File $file`, `$flags = null`              | `null` or `string` |
-|retrieve | `string $uuid`                             | `null` or `File`   |
-|delete   | `string $uuid`                             | `null`             |
-|truncate | `string $uuid`, `int $keep = 0`            | `null`             |
-|serve    | `string $uuid`                             | `string`           |
-|save     | `string $uuid`, `string $path` `string as` | `null`             |
-|embed    | `string $path`                             | `null` or `File`   |
+| Method         | Parameters                                 | Return             |
+|----------------|--------------------------------------------|--------------------|
+|upload          | `File $file`, `$flags = null`              | `null` or `string` |
+|uploadByChunks  | `File $file`, `$flags = null`              | `null` or `string` |
+|retrieve        | `string $uuid`                             | `null` or `File`   |
+|delete          | `string $uuid`                             | `null`             |
+|truncate        | `string $uuid`, `int $keep = 0`            | `null`             |
+|serve           | `string $uuid`                             | `string`           |
+|save            | `string $uuid`, `string $path` `string as` | `null`             |
+|embed           | `string $path`                             | `null` or `File`   |
 
 `$uuid` (Universal Unique Identifier) is a **unique id** corresponding to a file. (see **File entity** part)
 
@@ -380,21 +381,49 @@ use Fei\Service\Filer\Entity\File;
 use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Exception\RequestException;
 
-$file = (new File())
-    ->setCategory(File::CATEGORY_IMG)
-    ->setContexts(['test 1' => 'test 1', 'test 2' => 'test 2'])
-    ->setFilename('solr-7.0.1.tgz')
-    ->setFile(new SplFileObject(__DIR__ . 'solr-7.0.1.tgz'));
+try {
+    // Creating a Filer client instance...
+    
+    $file = (new File())
+        ->setCategory(File::CATEGORY_IMG)
+        ->setContexts(['test 1' => 'test 1', 'test 2' => 'test 2'])
+        ->setFilename('avatar.png')
+        ->setFile(new SplFileObject(__DIR__ . '/../tests/_data/avatar.png'));
 
-$filer->uploadByChunks(
-    $file,
-    function (Response $response, $index) {
-        var_dump($index);
-    },
-    function (RequestException $reason, $index) {
-        echo $reason->getMessage(); die();
-    }
-);
+    $uuid = $filer->uploadByChunks(
+        $file,
+        null,
+        function (Response $response, $index) {
+            var_dump($index);
+        }
+    );
+
+    // Add a new revision:
+
+    $file = (new File())
+        ->setCategory(File::CATEGORY_IMG)
+        ->setContexts(['test 1' => 'test 1', 'test 2' => 'test 2', 'test 3' => 'test 3'])
+        ->setFile(new SplFileObject(__DIR__ . '/../tests/_data/capture.png'))
+        ->setUuid($uuid);
+
+    $uuid = $filer->uploadByChunks(
+        $file,
+        \Fei\Service\Filer\Client\Filer::NEW_REVISION
+    );
+
+    // Update file for the latest revision
+    
+    $file = $filer->retrieve($uuid);
+    $file->setContexts(['test 1' => 'New value']);
+
+    $uuid = $filer->uploadByChunks(
+        $file
+    );
+} catch (\Fei\Service\Filer\Client\Exception\FilerException $e) {
+    echo $e->getMessage() . PHP_EOL;
+} catch (\Exception $e) {
+    echo $e->getMessage() . PHP_EOL;
+}
 ```
 
 `$fulfilled` callback will be executed each time a chunk is transmitted successfully. Otherwise `$rejected` callback
