@@ -11,6 +11,8 @@ use Fei\Service\Filer\Client\Builder\SearchBuilder;
 use Fei\Service\Filer\Client\Exception\FilerException;
 use Fei\Service\Filer\Client\Exception\ValidationException;
 use Fei\Service\Filer\Client\Service\FileWrapper;
+use Fei\Service\Filer\Entity\Context;
+use Fei\Service\Filer\Entity\ContextTransformer;
 use Fei\Service\Filer\Entity\File;
 use Fei\Service\Filer\Validator\FileValidator;
 use GuzzleHttp\Client;
@@ -117,8 +119,12 @@ class Filer extends AbstractApiClient implements FilerInterface
     /**
      * {@inheritdoc}
      */
-    public function uploadByChunks(File $file, callable $fulfilled = null, callable $rejected = null)
+    public function uploadByChunks(File $file, $flags = null, callable $fulfilled = null, callable $rejected = null)
     {
+        if ($flags & self::NEW_REVISION && $file->getUuid() === null) {
+            throw new ValidationException('UUID must be set when adding a new revision');
+        }
+
         if (is_null($rejected)) {
             $rejected = function (RequestException $reason, $index) {
                 throw FilerException::createWithRequestException($reason);
@@ -127,11 +133,44 @@ class Filer extends AbstractApiClient implements FilerInterface
 
         $uuid = empty($file->getUuid()) ? $this->createUuid($file->getCategory()) : $file->getUuid();
 
-        $file->setUuid($uuid);
+        if ($flags & self::NEW_REVISION) {
+            $method = 'PUT';
+            $uri = $this->buildUrl(self::API_CHUNK_UPLOAD_PATH_INFO);
+        } elseif ($file->getUuid() !== null) {
+            $method = 'PATCH';
+            $uri = $this->buildUrl(self::API_FILER_PATH_INFO);
+        } else {
+            $method = 'POST';
+            $file->setUuid($uuid);
+            $uri = $this->buildUrl(self::API_CHUNK_UPLOAD_PATH_INFO);
+        }
 
-        $uri = $this->buildUrl(self::API_CHUNK_UPLOAD_PATH_INFO);
+        switch($method) {
+            case 'POST':
+            case 'PUT':
+                return $this->saveFile($file, $method, $uri, $fulfilled, $rejected);
+                break;
 
-        $totalChunks = ceil($file->getFile()->getSize() / $this->getChunkSize());
+            case 'PATCH':
+                return $this->updateFile($file, $method, $uri);
+                break;
+        }
+    }
+
+    /**
+     * @param File $file
+     * @param $method
+     * @param $uri
+     * @param callable|null $fulfilled
+     * @param callable|null $rejected
+     * @return string
+     */
+    protected function saveFile(File $file, $method, $uri, callable $fulfilled = null, callable $rejected = null)
+    {
+        $totalChunks = (int) ceil($file->getFile()->getSize() / $this->getChunkSize());
+
+        $uuid = $file->getUuid();
+
         $secret = md5(uniqid(rand(), true));
 
         $createChunkBody = function (File $file, $chunkPosition = 1, $cursorPosition = 0) use ($secret, $totalChunks, $uuid) {
@@ -150,13 +189,20 @@ class Filer extends AbstractApiClient implements FilerInterface
             ];
 
             if ($chunkPosition == 1) {
+                $transformer = new ContextTransformer();
+                $contexts = $file->getContexts();
+                /** @var Context $context */
+                foreach ($contexts as $k => $context) {
+                    $contexts[$k] = $transformer->transform($context);
+                }
+
                 $body['file'] = [
                     'contentType' => $file->getContentType(),
                     'filename' => $file->getFilename(),
                     'size' => $file->getFile()->getSize(),
                     'form' => http_build_query([
                         'category' => $file->getCategory(),
-                        'contexts' => $file->getContexts()->toArray()
+                        'contexts' => $contexts->toArray()
                     ])
                 ];
             }
@@ -171,7 +217,7 @@ class Filer extends AbstractApiClient implements FilerInterface
         try {
             $response = $client->send(
                 new Request(
-                    'POST',
+                    $method,
                     $uri,
                     ['Content-Type' => 'application/x-www-form-urlencoded; charset=UTF-8'],
                     http_build_query($createChunkBody($file))
@@ -186,7 +232,7 @@ class Filer extends AbstractApiClient implements FilerInterface
         }
 
         if ($totalChunks > 1) {
-            $request = function (File $file) use ($uri, $createChunkBody) {
+            $request = function (File $file) use ($uri, $createChunkBody, $method) {
                 $chunkPosition = 1;
                 $cursorPosition = 0;
 
@@ -195,7 +241,7 @@ class Filer extends AbstractApiClient implements FilerInterface
                     $cursorPosition += $this->getChunkSize();
 
                     yield new Request(
-                        'POST',
+                        $method,
                         $uri,
                         ['Content-Type' => 'application/x-www-form-urlencoded; charset=UTF-8'],
                         http_build_query($createChunkBody($file, $chunkPosition, $cursorPosition))
@@ -214,6 +260,31 @@ class Filer extends AbstractApiClient implements FilerInterface
         }
 
         return $file->getUuid();
+    }
+
+    /**
+     * @param File $file
+     * @param $method
+     * @param $uri
+     * @return string
+     */
+    protected function updateFile(File $file, $method, $uri)
+    {
+        $checkData = false;
+
+        if ($file instanceof FileWrapper) {
+            $file->setSkipData(true);
+        }
+
+        $this->validateFile($file, $checkData);
+
+        $request = (new RequestDescriptor())
+        ->setMethod($method)
+        ->setUrl($uri);
+        $request->addHeader('Content-Type', 'application/x-www-form-urlencoded');
+        $request->setBodyParams(['file' => \json_encode($file->toArray())]);
+
+       return $this->send($request);
     }
 
     /**
