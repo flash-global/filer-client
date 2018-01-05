@@ -1,28 +1,51 @@
-# Filer Client
+# Service Filer - Client
 
-This is the client you should use for consuming the Filer service.
+[![GitHub release](https://img.shields.io/github/release/opcoding/filer-client.svg?style=for-the-badge)](README.md) 
 
-The client can use two kinds of transports to send requests:
+## Table of contents
+- [Purpose](#purpose)
+- [Requirements](#requirements)
+    - [Runtime](#runtime)
+- [Step by step installation](#step-by-step-installation)
+    - [Initialization](#initialization)
+    - [Settings](#settings)
+    - [Known issues](#known-issues)
+- [Contribution](#contribution)
+- [Link to documentation](#link-to-documentation)
+    - [Examples](#examples)
 
-* Asynchronous transport implemented by `BeanstalkProxyTransport`
-* Synchronous transport implemented by `BasicTransport`
+## Purpose
+This client permit to use the `Filer Api`. Thanks to it, you could request the API to :
+* Upload file
+* Retrieve file
+* Delete file
 
-`BeanstalkProxyTransport` delegate the API consumption to workers by sending file properties to a Beanstalkd queue.
+easily
 
-`BasicTransport` use the _classic_ HTTP layer to send files.
+## Requirements 
 
-If asynchronous transport is set, it will act as default transport. Synchronous transport will be a fallback in case
-when asynchronous transport fails.
+### Runtime
+- PHP 5.5
 
-All examples in this document will use `BeanstalkProxyTransport` and `BasicTransport`.
+## Step by step Installation
+> for all purposes (development, contribution and production)
 
-## Installation
+### Initialization
+- Cloning repository 
+```git clone https://github.com/flash-global/filer-client.git```
+- Run Composer depedencies installation
+```composer install```
 
-Filer Client needs **PHP 5.5** or higher.
+### Settings
 
-Add this requirement to your `composer.json`: `"fei/filer-client": : "^1.0"`
+Don't forget to set the right `baseUrl` :
 
-Or execute `composer.phar require fei/filer-client` in your terminal.
+```php
+<?php 
+$filer = new Filer([Filer::OPTION_BASEURL => 'http://127.0.0.1:8020']);
+$filer->setTransport(new BasicTransport());
+```
+
 
 If you want use the asynchronous functionality of the Filer client (and we know you want), you need an instance of
 [Beanstalkd](http://kr.github.io/beanstalkd/) which running properly and an instance of `api-client-worker.php` which
@@ -59,37 +82,21 @@ php /path/to/filer-client/vendor/bin/api-client-worker.php --host 127.0.0.1 --po
 
 You can control the `api-client-worker.php` process by using [Supervisor](http://supervisord.org/index.html).
 
-## Entities and classes
 
-### File entity
+### Known issues
+No known issue at this time.
 
-In addition to traditional ID and CreatedAt fields, File Entity has **six* important properties:
+## Contribution
+As FEI Service, designed and made by OpCoding. The contribution workflow will involve both technical teams. Feel free to contribute, to improve features and apply patches, but keep in mind to carefully deal with pull request. Merging must be the product of complete discussions between Flash and OpCoding teams :) 
 
-| Properties    | Type              |
-|---------------|-------------------|
-| id            | `integer`         |
-| createdAt     | `datetime`        |
-| filename      | `string`          |
-| uuid          | `string`          |
-| revision      | `integer`         |
-| category      | `integer`         |
-| contentType   | `string`          |
-| data          | `string`          |
-| file          | `string`          |
-| contexts      | `ArrayColleciton` |
 
-- `$uuid` (Universal Unique Identifier) is a **unique id** corresponding to a file. Its format is based on
-  **36 characters** as defined in `RFC4122` prefixed by a **backend id** and separated by a `:`.
-  Example: `bck1:f6461366-a414-4b98-a76d-d7b190252e74`
-- `filename` is a string indicating the file's filename.
-- `revision` is an integer indicating the file's current revision.
-- `category` is an integer defining in which database the file will be stored in.
-- `contentType` defines the content type of the `File` object.
-- `data` contains the file's content.
-- `file` is an `SplFileObject` instance. (see https://secure.php.net/manual/en/class.splfileobject.php for more details)
-- `contexts` is an `ArrayCollection` instance where each element is a Context entity
+## Link to documentation 
 
-## Basic usage
+### Examples
+You can test this client easily thanks to the folder [examples](examples)
+
+Here, an example on how to use example : `php /my/filer-client/folder/examples/upload.php` 
+
 
 In order to consume `File` method, you have to define a new `Filer` instance and set transport type (Async and Sync):
 
@@ -130,7 +137,7 @@ There are several methods in `Filer` class, all listed in the following table:
 
 `$uuid` (Universal Unique Identifier) is a **unique id** corresponding to a file. (see **File entity** part)
 
-### Client option
+#### Client option
 
 Only one option is available which can be passed to the constructor or `Filer::setOptions(array $options)` methods:
 
@@ -140,7 +147,7 @@ Only one option is available which can be passed to the constructor or `Filer::s
 
 **Note:** All the examples below are also available in `examples` directory.
 
-### Search the files
+#### Search the files
 
 You can search the files directly from the client with `Filer::search($builder)`
 
@@ -195,7 +202,7 @@ Here is an example on how to search a file with it's uuid :
 $builder->uuid()->equal('bck1:30d6a8ed-f9cf-4a6d-a76e-04ec941d1f45');
 ```
 
-### Upload a new file
+#### Upload a new file
 
 You can upload a file instance with `Filer::upload($file, $flags)`:
 
@@ -206,7 +213,7 @@ You can upload a file instance with `Filer::upload($file, $flags)`:
 
 The function will return `null` or a `string` describing the new file path.
 
-#### Example
+##### Example
 
 ```php
 <?php
@@ -248,13 +255,13 @@ $file = Filer::embed('/path/to/the/file.pdf');
 $file = $filer->upload($file, Filer::ASYNC_UPLOAD);
 ```
 
-### Retrieve a file
+#### Retrieve a file
 
 You can retrieve a file instance with `Filer::retrieve($uuid)`. The only necessary parameter is a valid file `uuid`.
 
 This method returns a `File` instance or null if the file was not found.
 
-#### Example
+##### Example
 
 ```php
 <?php
@@ -264,11 +271,11 @@ This method returns a `File` instance or null if the file was not found.
 $file = $filer->retrieve('bck1:f6461366-a414-4b98-a76d-d7b190252e74');
 ```
 
-### Delete a file
+#### Delete a file
 
 You can delete a file with `Filer::delete($uuid)`. The only necessary parameter is a valid file `uuid`.
 
-#### Example
+##### Example
 
 ```php
 <?php
@@ -282,12 +289,12 @@ $filer->delete('bck1:f6461366-a414-4b98-a76d-d7b190252e74');
 echo $filer->retrieve('bck1:f6461366-a414-4b98-a76d-d7b190252e74') instanceof File; // false
 ```
 
-### Truncate a file
+#### Truncate a file
 
 The `Filer::truncate($uuid, $keep = 0)` method allows you to remove every revisions of a file, except a determined
 number of revisions.
 
-#### Example
+##### Example
 
 ```php
 <?php
@@ -317,11 +324,11 @@ $uuid = $filer->upload(
 $filer->truncate($uuid, 1);
 ```
 
-### Save
+#### Save
 
 `Filer::save($uuid, $path, $as = null)` method is a way to retrieve and save a local copy of a remote File.
 
-#### Example
+##### Example
 
 ```php
 <?php
@@ -341,13 +348,13 @@ $uuid = $filer->upload(
 $filer->save($uuid, __DIR__ . '/../tests/_data/save/file_saved.png');
 ```
 
-### Serve a file
+#### Serve a file
 
 With the method `Filer::serve($uuid, $flag = Filer::FORCE_DOWNLOAD)` you can serve a file to user agents and force the download.
 
 If you don't want to download the file and show it, you can call the method like this: `Filer::serve($uuid, Filer::FORCE_INLINE)`
 
-#### Example
+##### Example
 
 ```php
 <?php
@@ -367,12 +374,12 @@ $uuid = $filer->upload(
 $filer->serve($uuid);
 ```
 
-### Upload large files by chunk
+#### Upload large files by chunk
 
 From the version 1.1.0 of this client it is possible tu upload large file by chunk. In order to do this, ypu have to use
 the `Filer::uploadByChunk(File $file, callable $fulfilled = null, callable $rejected = null)` method.
 
-#### Example
+##### Example
 
 ```php
 <?php
