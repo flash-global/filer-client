@@ -23,7 +23,7 @@
     "repositories": [
         {
             "type": "composer",
-            "url": "https://composer.flash-global.net"
+            "url": "https://composer.flash.global"
         }
     ],
     "require": {
