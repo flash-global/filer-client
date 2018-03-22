@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "61310d4314ed893c7559654a032d80a6",
+    "content-hash": "0424dc7b2f275f021cf27f40897cdcd6",
     "packages": [
         {
             "name": "doctrine/annotations",
@@ -409,7 +409,7 @@
             "version": "v1.2.2",
             "source": {
                 "type": "git",
-                "url": "git@github.com:flash-global/api-client.git",
+                "url": "https://github.com/flash-global/api-client.git",
                 "reference": "427236a046c9f7e08e5d110d39eecbe260338629"
             },
             "dist": {
@@ -452,13 +452,13 @@
             "source": {
                 "type": "git",
                 "url": "git@github.com:flash-global/entities.git",
-                "reference": "21eeb9dee1c43dc1520228d41aea8d5bc2b305ef"
+                "reference": "16329f6d7691d404928cacfc6e71fc4aebd4d785"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://composer.flash-global.net/dist/fei-entities-21eeb9dee1c43dc1520228d41aea8d5bc2b305ef-zip-0ace6b.zip",
-                "reference": "21eeb9dee1c43dc1520228d41aea8d5bc2b305ef",
-                "shasum": "ca5a9abf9b0bcd3d95452ac52071e2b5a6bb8c7a"
+                "url": "https://composer.flash-global.net/dist/fei-entities-16329f6d7691d404928cacfc6e71fc4aebd4d785-zip-526121.zip",
+                "reference": "16329f6d7691d404928cacfc6e71fc4aebd4d785",
+                "shasum": "4ce0772479229da5f74f71ae4d2bc2c27802996b"
             },
             "require-dev": {
                 "codeception/codeception": "^2.2",
@@ -474,25 +474,21 @@
                 "Proprietary"
             ],
             "description": "Entities descriptors and helpers",
-            "support": {
-                "source": "https://github.com/flash-global/entities/tree/v1.1.0",
-                "issues": "https://github.com/flash-global/entities/issues"
-            },
-            "time": "2017-11-20T10:42:15+00:00"
+            "time": "2017-11-15T10:58:57+00:00"
         },
         {
             "name": "fei/filer-common",
-            "version": "v1.1.0",
+            "version": "v1.1.1",
             "source": {
                 "type": "git",
                 "url": "git@github.com:flash-global/filer-common.git",
-                "reference": "8957f72f9aa900e1990a4dfec3a8844cd1f7c320"
+                "reference": "2b41e60f25589304c9b454d19b65753130471623"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://composer.flash-global.net/dist/fei-filer-common-8957f72f9aa900e1990a4dfec3a8844cd1f7c320-zip-1cda3a.zip",
-                "reference": "8957f72f9aa900e1990a4dfec3a8844cd1f7c320",
-                "shasum": "b2ce90b8fdbe29f8c41eb4e6e7320ad3c63149fb"
+                "url": "https://composer.flash-global.net/dist/fei-filer-common-2b41e60f25589304c9b454d19b65753130471623-zip-5f2ac7.zip",
+                "reference": "2b41e60f25589304c9b454d19b65753130471623",
+                "shasum": "814378f6d8b1a2594835a1fb3f22c9e556c3df5b"
             },
             "require": {
                 "doctrine/common": "^2.6",
@@ -525,10 +521,10 @@
                 "filer"
             ],
             "support": {
-                "source": "https://github.com/flash-global/filer-common/tree/v1.1.0",
+                "source": "https://github.com/flash-global/filer-common/tree/v1.1.1",
                 "issues": "https://github.com/flash-global/filer-common/issues"
             },
-            "time": "2017-12-06T09:03:09+00:00"
+            "time": "2018-03-22T13:17:13+00:00"
         },
         {
             "name": "guzzlehttp/guzzle",
