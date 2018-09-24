@@ -7,7 +7,10 @@ use Fei\Service\Filer\Client\Filer;
 use Fei\ApiClient\Transport\BasicTransport;
 use Fei\Service\Filer\Entity\File;
 
-$filer = new Filer([Filer::OPTION_BASEURL => 'http://127.0.0.1:8020']);
+$filer = new Filer([
+    Filer::OPTION_BASEURL => 'http://127.0.0.1:8020',
+    Filer::OPTION_HEADER_AUTHORIZATION => 'key'
+]);
 
 $filer->setTransport(new BasicTransport());
 

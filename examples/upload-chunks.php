@@ -10,7 +10,10 @@ include __DIR__ . '/../vendor/autoload.php';
 
 $chunkSize = 20 * 1024 * 1024;
 
-$filer = new Filer([Filer::OPTION_BASEURL => 'http://127.0.0.1:8020']);
+$filer = new Filer([
+    Filer::OPTION_BASEURL => 'http://127.0.0.1:8020',
+    Filer::OPTION_HEADER_AUTHORIZATION => 'key'
+]);
 $filer->setTransport(new BasicTransport());
 
 try {
