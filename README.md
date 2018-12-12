@@ -105,7 +105,10 @@ use Fei\ApiClient\Transport\BasicTransport;
 use Fei\ApiClient\Transport\BeanstalkProxyTransport;
 use Pheanstalk\Pheanstalk;
 
-$filer = new Filer([Filer::OPTION_BASEURL => 'https://filer.api.com']); // Put your filer API base URL here
+$filer = new Filer([
+    Filer::OPTION_BASEURL => 'https://filer.api.com', // Put your filer API base URL here
+    Filer::OPTION_HEADER_AUTHORIZATION => 'apiKey'
+]); 
 $filer->setTransport(new BasicTransport());
 
 $proxy = new BeanstalkProxyTransport();
@@ -141,6 +144,8 @@ Only one option is available which can be passed to the constructor or `Filer::s
 | Option         | Description                                    | Type   | Possible Values                                | Default |
 |----------------|------------------------------------------------|--------|------------------------------------------------|---------|
 | OPTION_BASEURL | This is the server to which send the requests. | string | Any URL, including protocol but excluding path | -       |
+| OPTION_HEADER_AUTHORIZATION    | Api Key for authentification                                               | string | Any string value                               | ''                      |
+
 
 **Note:** All the examples below are also available in `examples` directory.
 
@@ -159,7 +164,10 @@ use Fei\Service\Filer\Client\Filer;
 use Fei\Service\Filer\Client\Builder\SearchBuilder;
 
 // Creating a Filer client instance...
-$filer = new Filer([Filer::OPTION_BASEURL => 'http://127.0.0.1:8080']);
+$filer = new Filer([
+    Filer::OPTION_BASEURL => 'http://127.0.0.1:8080',
+    Filer::OPTION_HEADER_AUTHORIZATION => 'apiKey'
+]);
 
 $builder = new SearchBuilder();
 $builder->category()->equal(1);
