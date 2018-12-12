@@ -145,7 +145,7 @@ class Filer extends AbstractApiClient implements FilerInterface
             $uri = $this->buildUrl(self::API_CHUNK_UPLOAD_PATH_INFO);
         }
 
-        switch($method) {
+        switch ($method) {
             case 'POST':
             case 'PUT':
                 return $this->saveFile($file, $method, $uri, $fulfilled, $rejected);
@@ -284,7 +284,7 @@ class Filer extends AbstractApiClient implements FilerInterface
         $request->addHeader('Content-Type', 'application/x-www-form-urlencoded');
         $request->setBodyParams(['file' => \json_encode($file->toArray())]);
 
-       return $this->send($request);
+        return $this->send($request);
     }
 
     /**

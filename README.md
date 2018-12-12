@@ -1,4 +1,8 @@
 # Filer Client
+[![GitHub license](https://img.shields.io/github/license/flash-global/filer-client.svg)](https://github.com/flash-global/filer-client)
+![continuousphp](https://img.shields.io/continuousphp/git-hub/flash-global/filer-client.svg)
+[![Build Status](https://travis-ci.org/flash-global/filer-client.svg?branch=master)](https://travis-ci.org/flash-global/filer-client)
+[![GitHub issues](https://img.shields.io/github/issues/flash-global/filer-client.svg)](https://github.com/flash-global/filer-client/issues)
 
 This is the client you should use for consuming the Filer service.
 
