@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "bff3a36ce2da6c35df94cb2b2dacf3da",
+    "content-hash": "897a6a64ce0beeadb14872eca9124a6d",
     "packages": [
         {
             "name": "doctrine/annotations",
@@ -732,11 +732,11 @@
         },
         {
             "name": "fei/filer-common",
-            "version": "v1.2.1",
+            "version": "2.0.0",
             "source": {
                 "type": "git",
                 "url": "git@github.com:flash-global/filer-common.git",
-                "reference": "d280f54454db21c13b98baf31371995a6dbd1a5b"
+                "reference": "6442608030f36c0b673b678a6be3fc0a05322f66"
             },
             "require": {
                 "doctrine/common": "^2.6",
@@ -767,7 +767,7 @@
             "keywords": [
                 "filer"
             ],
-            "time": "2018-12-12T20:05:38+00:00"
+            "time": "2018-12-12T23:38:11+00:00"
         },
         {
             "name": "guzzlehttp/guzzle",
