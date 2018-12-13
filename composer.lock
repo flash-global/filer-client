@@ -732,11 +732,11 @@
         },
         {
             "name": "fei/filer-common",
-            "version": "2.0.0",
+            "version": "2.0.1",
             "source": {
                 "type": "git",
                 "url": "git@github.com:flash-global/filer-common.git",
-                "reference": "6442608030f36c0b673b678a6be3fc0a05322f66"
+                "reference": "c92f068df9792ac76726c50e5ab5536248dd4b81"
             },
             "require": {
                 "doctrine/common": "^2.6",
@@ -767,7 +767,7 @@
             "keywords": [
                 "filer"
             ],
-            "time": "2018-12-12T23:38:11+00:00"
+            "time": "2018-12-13T00:30:20+00:00"
         },
         {
             "name": "guzzlehttp/guzzle",
