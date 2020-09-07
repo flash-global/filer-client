@@ -1,10 +1,10 @@
 {
     "_readme": [
         "This file locks the dependencies of your project to a known state",
-        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "1c30557351ae55af22893bccafbb2956",
+    "content-hash": "edca596ef0d2abf1e25fdf66ee7434cc",
     "packages": [
         {
             "name": "doctrine/annotations",
@@ -492,16 +492,16 @@
         },
         {
             "name": "fei/filer-common",
-            "version": "v1.1.2",
+            "version": "v1.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/flash-global/filer-common.git",
-                "reference": "3b01fe1c6a217d1ee4eed1eb3c3a05e4a3ddf934"
+                "reference": "2b78165e30e1759799066b7eae82e252cef99f1b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/flash-global/filer-common/zipball/3b01fe1c6a217d1ee4eed1eb3c3a05e4a3ddf934",
-                "reference": "3b01fe1c6a217d1ee4eed1eb3c3a05e4a3ddf934",
+                "url": "https://api.github.com/repos/flash-global/filer-common/zipball/2b78165e30e1759799066b7eae82e252cef99f1b",
+                "reference": "2b78165e30e1759799066b7eae82e252cef99f1b",
                 "shasum": ""
             },
             "require": {
@@ -534,7 +534,7 @@
             "keywords": [
                 "filer"
             ],
-            "time": "2018-05-25T08:22:00+00:00"
+            "time": "2020-09-04T14:46:45+00:00"
         },
         {
             "name": "guzzlehttp/guzzle",
@@ -1170,12 +1170,12 @@
             "version": "1.4.1",
             "source": {
                 "type": "git",
-                "url": "https://github.com/facebook/php-webdriver.git",
+                "url": "https://github.com/php-webdriver/php-webdriver-archive.git",
                 "reference": "eadb0b7a7c3e6578185197fd40158b08c3164c83"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/facebook/php-webdriver/zipball/eadb0b7a7c3e6578185197fd40158b08c3164c83",
+                "url": "https://api.github.com/repos/php-webdriver/php-webdriver-archive/zipball/eadb0b7a7c3e6578185197fd40158b08c3164c83",
                 "reference": "eadb0b7a7c3e6578185197fd40158b08c3164c83",
                 "shasum": ""
             },
@@ -1215,6 +1215,7 @@
                 "selenium",
                 "webdriver"
             ],
+            "abandoned": "php-webdriver/webdriver",
             "time": "2017-04-28T14:54:49+00:00"
         },
         {
@@ -1672,6 +1673,7 @@
             "keywords": [
                 "tokenizer"
             ],
+            "abandoned": true,
             "time": "2017-12-04T08:55:13+00:00"
         },
         {
@@ -1800,6 +1802,7 @@
                 "mock",
                 "xunit"
             ],
+            "abandoned": true,
             "time": "2015-10-02T06:51:40+00:00"
         },
         {
