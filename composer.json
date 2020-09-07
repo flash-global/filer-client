@@ -22,7 +22,7 @@
   },
   "require": {
     "fei/api-client": "^1.1",
-    "fei/filer-common": "~1.1.0"
+    "fei/filer-common": "~1"
   },
   "require-dev": {
     "codeception/codeception": "^2.2",
